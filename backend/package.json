@@ -1,0 +1,32 @@
+{
+  "name": "indielife-backend",
+  "version": "1.0.0",
+  "description": "IndieLife Platform Backend API",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "indielife",
+    "services",
+    "platform"
+  ],
+  "author": "IndieLife Team",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^9.0.0",
+    "multer": "^2.0.2",
+    "nodemailer": "^7.0.10",
+    "socket.io": "^4.8.3",
+    "stripe": "^20.4.0",
+    "twilio": "^5.10.6"
+  }
+}

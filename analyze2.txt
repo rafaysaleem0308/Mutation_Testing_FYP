@@ -1,0 +1,13 @@
+Analyzing meal.dart...                                          
+
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\services\screens\meal.dart:640:51 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\services\screens\meal.dart:654:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\services\screens\meal.dart:655:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\services\screens\meal.dart:660:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\services\screens\meal.dart:684:58 - deprecated_member_use
+  error - The argument type 'DraggableScrollableSheet Function(BuildContext, dynamic)' can't be assigned to the parameter type 'WidgetBuilder'.  - lib\features\services\screens\meal.dart:743:16 - argument_type_not_assignable
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\services\screens\meal.dart:769:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\services\screens\meal.dart:781:73 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\services\screens\meal.dart:916:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\services\screens\meal.dart:1011:24 - deprecated_member_use
+
