@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const RefreshToken = require("../models/refresh-token.model");
 const { verifyToken, JWT_SECRET } = require("../middleware/auth");
+const { authLimiter } = require("../middleware/rateLimit");
 const {
   generateRefreshToken,
   generateAccessToken,
@@ -178,12 +179,28 @@ router.post("/", async (req, res) => {
     });
   } catch (err) {
     console.error("Signup error:", err);
-    res.status(400).json({ success: false, error: err.message });
+    // Don't expose internal error details - return user-friendly message
+    const errorMsg = err.message || "An error occurred during signup";
+    let statusCode = 500;
+    let userMessage = "An error occurred during signup. Please try again.";
+
+    if (errorMsg.includes("duplicate key")) {
+      userMessage = "This email or phone number is already registered";
+      statusCode = 400;
+    } else if (errorMsg.includes("validation failed")) {
+      userMessage = "Invalid data provided. Please check all fields";
+      statusCode = 400;
+    }
+
+    res.status(statusCode).json({
+      success: false,
+      error: userMessage,
+    });
   }
 });
 
 // LOGIN USER
-router.post("/login", async (req, res) => {
+router.post("/login", authLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
 

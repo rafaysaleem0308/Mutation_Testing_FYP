@@ -5,6 +5,7 @@ const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 const User = require("../models/user.model");
 const ServiceProvider = require("../models/service-provider.model");
+const Otp = require("../models/otp.model");
 
 // Configure nodemailer
 const transporter = nodemailer.createTransport({
@@ -14,9 +15,6 @@ const transporter = nodemailer.createTransport({
     pass: "zcusdtjpujnealfo",
   },
 });
-
-// Store OTPs temporarily (in production, use Redis or database)
-const otpStore = new Map();
 
 // ================================
 // SIGNUP OTP ROUTES
@@ -34,21 +32,33 @@ router.post("/send-otp-signup", async (req, res) => {
     const existingSP = await ServiceProvider.findOne({ email });
 
     if (existingUser || existingSP) {
+      // Provide more helpful error message indicating which account type exists
+      const existingAccountType = existingUser ? "User" : "Service Provider";
       return res.status(400).json({
         status: "error",
         message: "Account already exists with this email address",
+        existingAccountType: existingAccountType,
+        suggestion:
+          existingAccountType === "User"
+            ? "This email is already registered as a User account. Please use the login page or try with a different email."
+            : "This email is already registered as a Service Provider account. Please use the login page or try with a different email.",
       });
     }
 
     // Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Store OTP with expiration (5 minutes) and role
-    otpStore.set(email, {
+    // Delete any existing OTP for this email
+    await Otp.deleteOne({ identifier: email });
+
+    // Store OTP in database with expiration (5 minutes)
+    await Otp.create({
+      identifier: email,
       otp,
       role,
       type: "signup",
-      expiresAt: Date.now() + 5 * 60 * 1000, // 5 minutes
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes from now
+      verified: false,
     });
 
     // Send email
@@ -168,9 +178,12 @@ router.post("/verify-otp-signup", async (req, res) => {
 
     console.log("Verifying OTP:", { email, otp });
 
-    // DEBUG LOGGING
-    console.log("Current OTP Store Keys:", Array.from(otpStore.keys()));
-    const otpData = otpStore.get(email);
+    // Find OTP record in database
+    const otpData = await Otp.findOne({
+      identifier: email,
+      type: "signup",
+    });
+
     console.log("OTP Data Found:", otpData);
 
     if (!otpData) {
@@ -180,8 +193,8 @@ router.post("/verify-otp-signup", async (req, res) => {
       });
     }
 
-    if (Date.now() > otpData.expiresAt) {
-      otpStore.delete(email);
+    if (Date.now() > otpData.expiresAt.getTime()) {
+      await Otp.deleteOne({ _id: otpData._id });
       return res.status(400).json({
         status: "error",
         message: "OTP has expired. Please request a new OTP.",
@@ -195,11 +208,8 @@ router.post("/verify-otp-signup", async (req, res) => {
       });
     }
 
-    // OTP verified successfully - mark email as verified
-    otpStore.set(email, {
-      ...otpData,
-      verified: true,
-    });
+    // OTP verified successfully - mark email as verified in database
+    await Otp.updateOne({ _id: otpData._id }, { verified: true });
 
     console.log("OTP verified successfully for:", email);
 
@@ -243,11 +253,17 @@ router.post("/send-otp", async (req, res) => {
     // Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Store OTP with expiration (5 minutes)
-    otpStore.set(email, {
+    // Delete any existing OTP for this email
+    await Otp.deleteOne({ identifier: email });
+
+    // Store OTP in database with expiration (5 minutes) for password reset
+    await Otp.create({
+      identifier: email,
       otp,
+      role: "password_reset",
       type: "password_reset",
-      expiresAt: Date.now() + 5 * 60 * 1000, // 5 minutes
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes from now
+      verified: false,
     });
 
     // Send email
@@ -368,7 +384,11 @@ router.post("/verify-otp", async (req, res) => {
 
     console.log("Verifying password reset OTP:", { email, otp });
 
-    const otpData = otpStore.get(email);
+    // Find OTP record in database for password reset
+    const otpData = await Otp.findOne({
+      identifier: email,
+      type: "password_reset",
+    });
 
     if (!otpData) {
       return res.status(400).json({
@@ -377,8 +397,8 @@ router.post("/verify-otp", async (req, res) => {
       });
     }
 
-    if (Date.now() > otpData.expiresAt) {
-      otpStore.delete(email);
+    if (Date.now() > otpData.expiresAt.getTime()) {
+      await Otp.deleteOne({ _id: otpData._id });
       return res.status(400).json({
         status: "error",
         message: "OTP has expired. Please request a new OTP.",
@@ -393,10 +413,7 @@ router.post("/verify-otp", async (req, res) => {
     }
 
     // OTP verified successfully - mark as verified for password reset
-    otpStore.set(email, {
-      ...otpData,
-      verified: true,
-    });
+    await Otp.updateOne({ _id: otpData._id }, { verified: true });
 
     console.log("Password reset OTP verified successfully for:", email);
 
@@ -420,9 +437,14 @@ router.post("/reset-password", async (req, res) => {
 
     console.log("Resetting password for:", email);
 
-    // Check if OTP was verified
-    const otpData = otpStore.get(email);
-    if (!otpData || !otpData.verified) {
+    // Check if OTP was verified in database
+    const otpData = await Otp.findOne({
+      identifier: email,
+      type: "password_reset",
+      verified: true,
+    });
+
+    if (!otpData) {
       return res.status(400).json({
         status: "error",
         message: "Please verify your OTP first before resetting password",
@@ -459,7 +481,7 @@ router.post("/reset-password", async (req, res) => {
     }
 
     // Clear OTP data after successful password reset
-    otpStore.delete(email);
+    await Otp.deleteOne({ identifier: email, type: "password_reset" });
 
     res.json({
       status: "success",
@@ -478,9 +500,15 @@ router.post("/reset-password", async (req, res) => {
 router.post("/check-email-verified", async (req, res) => {
   try {
     const { email } = req.body;
-    const otpData = otpStore.get(email);
 
-    if (otpData && otpData.verified) {
+    // Find verified OTP in database for signup
+    const otpData = await Otp.findOne({
+      identifier: email,
+      type: "signup",
+      verified: true,
+    });
+
+    if (otpData) {
       res.json({ verified: true });
     } else {
       res.json({ verified: false });

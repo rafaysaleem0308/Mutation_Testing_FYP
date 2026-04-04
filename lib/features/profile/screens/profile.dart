@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'dart:io';
@@ -26,7 +27,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late TextEditingController _familyContractController;
   late TextEditingController _familyPhoneController;
 
-
   @override
   void initState() {
     super.initState();
@@ -34,7 +34,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _phoneController = TextEditingController();
     _addressController = TextEditingController();
     _familyContractController = TextEditingController();
-    _familyPhoneController = TextEditingController(); 
+    _familyPhoneController = TextEditingController();
     _loadProfile();
   }
 
@@ -84,31 +84,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
         'username': _nameController.text,
         'phone': _phoneController.text,
         'address': _addressController.text,
-         if (userData?['role']?.toString().toLowerCase() == 'user') ...{
+        if (userData?['role']?.toString().toLowerCase() == 'user') ...{
           'familyName': _familyContractController.text,
           'familyPhone': _familyPhoneController.text,
-         }
+        },
       };
 
-      final userId = userData?['id'] ?? userData?['userId'] ?? userData?['_id'] ?? '';
+      final userId =
+          userData?['id'] ?? userData?['userId'] ?? userData?['_id'] ?? '';
       if (userId.isEmpty) {
-         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error: User ID not found"), backgroundColor: Colors.red),
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Error: User ID not found"),
+            backgroundColor: Colors.red,
+          ),
         );
         setState(() => _isSaving = false);
         return;
       }
-      
+
       final role = userData?['role']?.toString().toLowerCase() ?? 'user';
 
       if (_imageFile != null) {
-        final imageResult = await ApiService.uploadProfileImage(userId, _imageFile!, role);
+        final imageResult = await ApiService.uploadProfileImage(
+          userId,
+          _imageFile!,
+          role,
+        );
         if (imageResult['success'] == true) {
           userData = imageResult['user'];
         } else {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(imageResult['message'] ?? "Failed to upload image"), backgroundColor: Colors.red),
+              SnackBar(
+                content: Text(
+                  imageResult['message'] ?? "Failed to upload image",
+                ),
+                backgroundColor: Colors.red,
+              ),
             );
             setState(() => _isSaving = false);
           }
@@ -126,11 +139,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _isEditing = false;
           });
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Profile updated successfully!"), backgroundColor: Colors.green),
+            SnackBar(
+              content: Text("Profile updated successfully!"),
+              backgroundColor: Colors.green,
+            ),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(result['message'] ?? "Failed to update profile"), backgroundColor: Colors.red),
+            SnackBar(
+              content: Text(result['message'] ?? "Failed to update profile"),
+              backgroundColor: Colors.red,
+            ),
           );
         }
       }
@@ -150,11 +169,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
       backgroundColor: Color(0xFFF5F7FA),
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.transparent, elevation: 0,
-        title: Text(_isEditing ? "Edit Profile" : "My Profile", style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: Colors.white)),
-        flexibleSpace: Container(decoration: BoxDecoration(gradient: LinearGradient(colors: [Color(0xFF1E293B), Colors.black]))),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: Text(
+          _isEditing ? "Edit Profile" : "My Profile",
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(colors: [Color(0xFF1E293B), Colors.black]),
+          ),
+        ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white), 
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
           onPressed: () {
             if (_isEditing) {
               setState(() {
@@ -165,12 +195,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
             } else {
               Navigator.pop(context);
             }
-          }
+          },
         ),
         actions: [
           if (!_isLoading)
             IconButton(
-              icon: Icon(_isEditing ? Icons.check : Icons.edit, color: Colors.white),
+              icon: Icon(
+                _isEditing ? Icons.check : Icons.edit,
+                color: Colors.white,
+              ),
               onPressed: () {
                 if (_isEditing) {
                   _saveProfile();
@@ -178,54 +211,120 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   setState(() => _isEditing = true);
                 }
               },
-            )
+            ),
         ],
       ),
-      body: _isLoading 
+      body: _isLoading
           ? Center(child: CircularProgressIndicator(color: Color(0xFF1E293B)))
           : SingleChildScrollView(
               padding: EdgeInsets.fromLTRB(24, 120, 24, 40),
               child: Form(
                 key: _formKey,
-                child: Column(children: [
-                  _buildProfileHeader(),
-                  SizedBox(height: 32),
-                  _buildInfoSection("Account Details", [
-                    _infoTile(Icons.person_outline, "Username", _nameController, enabled: _isEditing),
-                    _infoTile(Icons.phone_outlined, "Phone", _phoneController, enabled: _isEditing, keyboardType: TextInputType.phone),
-                    _infoTile(Icons.location_on_outlined, "Address", _addressController, enabled: _isEditing, maxLines: 2),
-                    if (!_isEditing) 
-                      ListTile(
-                        leading: Container(padding: EdgeInsets.all(8), decoration: BoxDecoration(color: Color(0xFFF9FAFB), borderRadius: BorderRadius.circular(12)), child: Icon(Icons.chat_bubble_outline, color: Colors.grey[600], size: 20)),
-                        title: Text("Messages", style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[600])),
-                        subtitle: Text("View your conversations", style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87)),
-                        trailing: Icon(Icons.arrow_forward_ios, size: 14),
-                        onTap: () => Navigator.pushNamed(context, '/my-chats'),
+                child: Column(
+                  children: [
+                    _buildProfileHeader(),
+                    SizedBox(height: 32),
+                    _buildInfoSection("Account Details", [
+                      _infoTile(
+                        Icons.person_outline,
+                        "Username",
+                        _nameController,
+                        enabled: _isEditing,
                       ),
-                  ]),
-                  SizedBox(height: 24),
-                  if (userData?['role'] == 'user') _buildInfoSection("Family Contact", [
-                    _infoTile(Icons.people_outline, "Contact Name", _familyContractController, enabled: _isEditing),
-                    _infoTile(Icons.call_outlined, "Contact Phone", _familyPhoneController, enabled: _isEditing, keyboardType: TextInputType.phone),
-                  ]),
-                  SizedBox(height: 40),
-                  if (_isEditing)
-                     SizedBox(
-                      width: double.infinity, height: 60,
-                      child: ElevatedButton(
-                        onPressed: _isSaving ? null : _saveProfile,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))
+                      _infoTile(
+                        Icons.phone_outlined,
+                        "Phone",
+                        _phoneController,
+                        enabled: _isEditing,
+                        keyboardType: TextInputType.phone,
+                      ),
+                      _infoTile(
+                        Icons.location_on_outlined,
+                        "Address",
+                        _addressController,
+                        enabled: _isEditing,
+                        maxLines: 2,
+                      ),
+                      if (!_isEditing)
+                        ListTile(
+                          leading: Container(
+                            padding: EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Color(0xFFF9FAFB),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(
+                              Icons.chat_bubble_outline,
+                              color: Colors.grey[600],
+                              size: 20,
+                            ),
+                          ),
+                          title: Text(
+                            "Messages",
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                          subtitle: Text(
+                            "View your conversations",
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          trailing: Icon(Icons.arrow_forward_ios, size: 14),
+                          onTap: () =>
+                              Navigator.pushNamed(context, '/my-chats'),
                         ),
-                        child: _isSaving 
-                          ? CircularProgressIndicator(color: Colors.white) 
-                          : Text("Save Changes", style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
-                      ),
-                    )
-                  else
-                    _buildLogoutButton(),
-                ]),
+                    ]),
+                    SizedBox(height: 24),
+                    if (userData?['role'] == 'user')
+                      _buildInfoSection("Family Contact", [
+                        _infoTile(
+                          Icons.people_outline,
+                          "Contact Name",
+                          _familyContractController,
+                          enabled: _isEditing,
+                        ),
+                        _infoTile(
+                          Icons.call_outlined,
+                          "Contact Phone",
+                          _familyPhoneController,
+                          enabled: _isEditing,
+                          keyboardType: TextInputType.phone,
+                        ),
+                      ]),
+                    SizedBox(height: 40),
+                    if (_isEditing)
+                      SizedBox(
+                        width: double.infinity,
+                        height: 60,
+                        child: ElevatedButton(
+                          onPressed: _isSaving ? null : _saveProfile,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.black,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          child: _isSaving
+                              ? CircularProgressIndicator(color: Colors.white)
+                              : Text(
+                                  "Save Changes",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                        ),
+                      )
+                    else
+                      _buildLogoutButton(),
+                  ],
+                ),
               ),
             ),
     );
@@ -247,100 +346,211 @@ class _ProfileScreenState extends State<ProfileScreen> {
     ImageProvider? imageProvider;
     if (_imageFile != null) {
       imageProvider = FileImage(_imageFile!);
-    } else if (userData?['profileImage'] != null && userData!['profileImage'].toString().isNotEmpty) {
-      imageProvider = NetworkImage(ApiService.baseUrl + userData!['profileImage']);
+    } else if (userData?['profileImage'] != null &&
+        userData!['profileImage'].toString().isNotEmpty) {
+      imageProvider = NetworkImage(
+        ApiService.baseUrl + userData!['profileImage'],
+      );
     }
 
     return Container(
       padding: EdgeInsets.all(24),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(28), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 20, offset: Offset(0, 8))]),
-      child: Column(children: [
-        GestureDetector(
-          onTap: _isEditing ? _pickImage : null,
-          child: Stack(children: [
-            CircleAvatar(
-              radius: 50, 
-              backgroundColor: Color(0xFF1E293B).withOpacity(0.1), 
-              backgroundImage: imageProvider,
-              child: imageProvider == null ? Icon(Icons.person, size: 50, color: Color(0xFF1E293B)) : null,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 20,
+            offset: Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          GestureDetector(
+            onTap: _isEditing ? _pickImage : null,
+            child: Stack(
+              children: [
+                CircleAvatar(
+                  radius: 50,
+                  backgroundColor: Color(0xFF1E293B).withOpacity(0.1),
+                  backgroundImage: imageProvider,
+                  child: imageProvider == null
+                      ? Icon(Icons.person, size: 50, color: Color(0xFF1E293B))
+                      : null,
+                ),
+                if (_isEditing)
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      padding: EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.black,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.camera_alt,
+                        size: 14,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+              ],
             ),
-            if (_isEditing)
-              Positioned(
-                bottom: 0, right: 0, 
-                child: Container(
-                  padding: EdgeInsets.all(6), 
-                  decoration: BoxDecoration(color: Colors.black, shape: BoxShape.circle), 
-                  child: Icon(Icons.camera_alt, size: 14, color: Colors.white)
-                )
-              ),
-          ]),
-        ),
-        SizedBox(height: 16),
-        Text(userData?['username'] ?? "User", style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.bold)),
-        Text(userData?['role']?.toString().toUpperCase() ?? "MEMBER", style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF1E293B), letterSpacing: 1)),
-        if (!_isEditing) ...[
-          SizedBox(height: 8),
-          Text(userData?['email'] ?? "", style: GoogleFonts.inter(fontSize: 14, color: Colors.grey[500])),
-        ]
-      ]),
+          ),
+          SizedBox(height: 16),
+          Text(
+            userData?['username'] ?? "User",
+            style: GoogleFonts.poppins(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            userData?['role']?.toString().toUpperCase() ?? "MEMBER",
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF1E293B),
+              letterSpacing: 1,
+            ),
+          ),
+          if (!_isEditing) ...[
+            SizedBox(height: 8),
+            Text(
+              userData?['email'] ?? "",
+              style: GoogleFonts.inter(fontSize: 14, color: Colors.grey[500]),
+            ),
+          ],
+        ],
+      ),
     ).animate().fadeIn().scale(duration: 400.ms);
   }
 
   Widget _buildInfoSection(String title, List<Widget> tiles) {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Padding(padding: const EdgeInsets.only(left: 8.0, bottom: 12), child: Text(title, style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold))),
-      Container(
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: Offset(0, 4))]),
-        child: Column(children: tiles),
-      )
-    ]);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 8.0, bottom: 12),
+          child: Text(
+            title,
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.02),
+                blurRadius: 10,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(children: tiles),
+        ),
+      ],
+    );
   }
 
-  Widget _infoTile(IconData icon, String label, TextEditingController controller, {bool enabled = false, TextInputType? keyboardType, int maxLines = 1}) {
+  Widget _infoTile(
+    IconData icon,
+    String label,
+    TextEditingController controller, {
+    bool enabled = false,
+    TextInputType? keyboardType,
+    int maxLines = 1,
+  }) {
     if (!enabled) {
       return ListTile(
-        leading: Container(padding: EdgeInsets.all(8), decoration: BoxDecoration(color: Color(0xFFF9FAFB), borderRadius: BorderRadius.circular(12)), child: Icon(icon, color: Colors.grey[600], size: 20)),
-        title: Text(label, style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[600])),
-        subtitle: Text(controller.text.isNotEmpty ? controller.text : "Not set", style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87)),
+        leading: Container(
+          padding: EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Color(0xFFF9FAFB),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, color: Colors.grey[600], size: 20),
+        ),
+        title: Text(
+          label,
+          style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[600]),
+        ),
+        subtitle: Text(
+          controller.text.isNotEmpty ? controller.text : "Not set",
+          style: GoogleFonts.inter(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+          ),
+        ),
       );
     }
-    
+
+    // Determine if this is a phone field
+    final isPhone = keyboardType == TextInputType.phone;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: TextFormField(
         controller: controller,
         keyboardType: keyboardType,
         maxLines: maxLines,
+        inputFormatters: isPhone
+            ? [FilteringTextInputFormatter.digitsOnly]
+            : [],
         decoration: InputDecoration(
           prefixIcon: Icon(icon, color: Color(0xFF1E293B), size: 20),
           labelText: label,
           labelStyle: GoogleFonts.inter(fontSize: 12, color: Colors.grey[600]),
           filled: true,
           fillColor: Color(0xFFF9FAFB),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
           contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         ),
-        validator: (value) => (value == null || value.isEmpty) ? '$label is required' : null,
+        validator: (value) =>
+            (value == null || value.isEmpty) ? '$label is required' : null,
       ),
     );
   }
 
   Widget _buildLogoutButton() {
     return SizedBox(
-      width: double.infinity, height: 60,
+      width: double.infinity,
+      height: 60,
       child: ElevatedButton(
         onPressed: () async {
           await ApiService.logout();
-          if (mounted) Navigator.pushNamedAndRemoveUntil(context, '/login', (r) => false);
+          if (mounted)
+            Navigator.pushNamedAndRemoveUntil(context, '/login', (r) => false);
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.white, elevation: 0, shadowColor: Colors.transparent, 
+          backgroundColor: Colors.white,
+          elevation: 0,
+          shadowColor: Colors.transparent,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20), 
-            side: BorderSide(color: Colors.red.withOpacity(0.3))
-          )
+            borderRadius: BorderRadius.circular(20),
+            side: BorderSide(color: Colors.red.withOpacity(0.3)),
+          ),
         ),
-        child: Text("Logout", style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.red)),
+        child: Text(
+          "Logout",
+          style: GoogleFonts.poppins(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.red,
+          ),
+        ),
       ),
     );
   }

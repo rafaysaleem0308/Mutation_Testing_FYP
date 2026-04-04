@@ -12,6 +12,7 @@ const {
   buildAdminResponse,
   generateAccessToken,
   generateRefreshToken,
+  buildSpPayload,
   REFRESH_TOKEN_EXPIRY_DAYS,
 } = require("./auth.routes");
 const RefreshToken = require("../models/refresh-token.model");
@@ -29,12 +30,10 @@ router.post("/login", async (req, res) => {
 
     const user = await User.findOne({ email, role: "admin" });
     if (!user) {
-      return res
-        .status(401)
-        .json({
-          success: false,
-          message: "Invalid credentials or not an admin",
-        });
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials or not an admin",
+      });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -287,19 +286,38 @@ router.patch(
           .json({ success: false, message: "Provider not found" });
       }
 
+      // If approved, create auth tokens
+      let tokens = null;
+      if (status === "approved") {
+        const accessToken = generateAccessToken(buildSpPayload(provider));
+        const refreshToken = generateRefreshToken();
+
+        await RefreshToken.create({
+          token: refreshToken,
+          userId: provider._id.toString(),
+          role: "service_provider",
+          userModel: "ServiceProvider",
+          expiresAt: new Date(
+            Date.now() + REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000,
+          ),
+        });
+
+        tokens = { accessToken, refreshToken };
+      }
+
       // Also update the linked User record if exists
       await User.updateMany(
         { spId: provider._id, role: "service_provider" },
         { isVerified: status === "approved" },
       );
 
-      res
-        .status(200)
-        .json({
-          success: true,
-          message: `Provider ${status} successfully`,
-          provider,
-        });
+      res.status(200).json({
+        success: true,
+        message: `Provider ${status} successfully`,
+        provider,
+        tokens,
+        provider,
+      });
     } catch (error) {
       res.status(500).json({ success: false, message: error.message });
     }
@@ -812,12 +830,10 @@ router.patch(
         "pending_approval",
       ];
       if (!validStatuses.includes(status)) {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: `Invalid status. Must be one of: ${validStatuses.join(", ")}`,
-          });
+        return res.status(400).json({
+          success: false,
+          message: `Invalid status. Must be one of: ${validStatuses.join(", ")}`,
+        });
       }
 
       const updateData = { status };

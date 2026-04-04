@@ -1,5 +1,7 @@
 import 'dart:ui';
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hello/features/auth/screens/login.dart';
 import 'package:hello/core/services/api_service.dart';
@@ -26,25 +28,96 @@ class SignupScreenState extends State<SignupScreen>
 
   // Password regex
   final RegExp passwordRegex = RegExp(
-    r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};:"\\|,.<>\/?]).{6,}$',
+    r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};:"\\|,.<>\/?]).{8,}$',
   );
 
   // List of major Pakistani cities
   final List<String> pakistaniCities = [
-    'Karachi', 'Lahore', 'Islamabad', 'Rawalpindi', 'Faisalabad', 'Multan',
-    'Peshawar', 'Quetta', 'Gujranwala', 'Sialkot', 'Sargodha', 'Bahawalpur',
-    'Sukkur', 'Larkana', 'Hyderabad', 'Abbottabad', 'Mardan', 'Mingora',
-    'Gujrat', 'Sheikhupura', 'Rahim Yar Khan', 'Jhang', 'Sahiwal', 'Wah Cantonment',
-    'Chiniot', 'Kamoke', 'Mandi Bahauddin', 'Kasur', 'Okara', 'Dera Ghazi Khan',
-    'Mirpur Khas', 'Chishtian', 'Taxila', 'Nowshera', 'Swabi', 'Bannu', 'Kohat',
-    'Mianwali', 'Kharian', 'Muzaffargarh', 'Jacobabad', 'Shikarpur', 'Khanewal',
-    'Hafizabad', 'Khushab', 'Charsadda', 'Thatta', 'Haripur', 'Pakpattan',
-    'Tando Adam', 'Jhelum', 'Badin', 'Rohri', 'Dadu', 'Kandhkot', 'Chakwal',
-    'Gojra', 'Matiari', 'Tando Allahyar', 'Vehari', 'Narowal', 'Pasrur',
-    'Jaranwala', 'Ahmedpur East', 'Kot Abdul Malik', 'Bhakkar', 'Khairpur',
-    'Daska', 'Lodhran', 'Hasilpur', 'Sadiqabad', 'Shahdadkot', 'Mian Channu',
-    'Bhalwal', 'Jamshoro', 'Pattoki', 'Haroonabad', 'Kahror Pakka', 'Ghotki',
-    'Nankana Sahib', 'Muridke', 'Kabirwala', 'Moro', 'Kandiaro', 'Chichawatni',
+    'Karachi',
+    'Lahore',
+    'Islamabad',
+    'Rawalpindi',
+    'Faisalabad',
+    'Multan',
+    'Peshawar',
+    'Quetta',
+    'Gujranwala',
+    'Sialkot',
+    'Sargodha',
+    'Bahawalpur',
+    'Sukkur',
+    'Larkana',
+    'Hyderabad',
+    'Abbottabad',
+    'Mardan',
+    'Mingora',
+    'Gujrat',
+    'Sheikhupura',
+    'Rahim Yar Khan',
+    'Jhang',
+    'Sahiwal',
+    'Wah Cantonment',
+    'Chiniot',
+    'Kamoke',
+    'Mandi Bahauddin',
+    'Kasur',
+    'Okara',
+    'Dera Ghazi Khan',
+    'Mirpur Khas',
+    'Chishtian',
+    'Taxila',
+    'Nowshera',
+    'Swabi',
+    'Bannu',
+    'Kohat',
+    'Mianwali',
+    'Kharian',
+    'Muzaffargarh',
+    'Jacobabad',
+    'Shikarpur',
+    'Khanewal',
+    'Hafizabad',
+    'Khushab',
+    'Charsadda',
+    'Thatta',
+    'Haripur',
+    'Pakpattan',
+    'Tando Adam',
+    'Jhelum',
+    'Badin',
+    'Rohri',
+    'Dadu',
+    'Kandhkot',
+    'Chakwal',
+    'Gojra',
+    'Matiari',
+    'Tando Allahyar',
+    'Vehari',
+    'Narowal',
+    'Pasrur',
+    'Jaranwala',
+    'Ahmedpur East',
+    'Kot Abdul Malik',
+    'Bhakkar',
+    'Khairpur',
+    'Daska',
+    'Lodhran',
+    'Hasilpur',
+    'Sadiqabad',
+    'Shahdadkot',
+    'Mian Channu',
+    'Bhalwal',
+    'Jamshoro',
+    'Pattoki',
+    'Haroonabad',
+    'Kahror Pakka',
+    'Ghotki',
+    'Nankana Sahib',
+    'Muridke',
+    'Kabirwala',
+    'Moro',
+    'Kandiaro',
+    'Chichawatni',
     'Turbat',
   ];
 
@@ -106,7 +179,10 @@ class SignupScreenState extends State<SignupScreen>
     );
     _slideAnimation = Tween<Offset>(begin: Offset(0, 0.1), end: Offset.zero)
         .animate(
-          CurvedAnimation(parent: _animationController, curve: Curves.easeOutQuart),
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeOutQuart,
+          ),
         );
     _animationController.forward();
   }
@@ -160,7 +236,8 @@ class SignupScreenState extends State<SignupScreen>
     if (RegExp(r'[A-Z]').hasMatch(password)) strength += 0.2;
     if (RegExp(r'[a-z]').hasMatch(password)) strength += 0.2;
     if (RegExp(r'[0-9]').hasMatch(password)) strength += 0.1;
-    if (RegExp(r'[!@#$%^&*()_+\-=\[\]{};:"\\|,.<>\/?]').hasMatch(password)) strength += 0.1;
+    if (RegExp(r'[!@#$%^&*()_+\-=\[\]{};:"\\|,.<>\/?]').hasMatch(password))
+      strength += 0.1;
 
     // Set strength text and color
     if (strength < 0.4) {
@@ -204,7 +281,10 @@ class SignupScreenState extends State<SignupScreen>
 
     if (email.isEmpty || !email.contains('@gmail.com')) {
       _showSnackBar("Please enter a valid Gmail address", true);
-      return {'status': 'error', 'message': 'Please enter a valid Gmail address'};
+      return {
+        'status': 'error',
+        'message': 'Please enter a valid Gmail address',
+      };
     }
 
     _safeSetState(() => _isOtpLoading = true);
@@ -220,7 +300,15 @@ class SignupScreenState extends State<SignupScreen>
         }
       });
 
-      _showSnackBar(result['message'], result['status'] != 'success');
+      // Handle account already exists error with better UI
+      if (result['status'] != 'success' &&
+          result['message']?.contains('already exists') == true) {
+        _showAccountExistsErrorDialog(
+          result['suggestion'] ?? result['message'] ?? 'Account already exists',
+        );
+      } else {
+        _showSnackBar(result['message'], result['status'] != 'success');
+      }
       return result;
     } catch (e) {
       _safeSetState(() => _isOtpLoading = false);
@@ -242,7 +330,10 @@ class SignupScreenState extends State<SignupScreen>
     _safeSetState(() => _isOtpLoading = true);
 
     try {
-      final result = await ApiService.verifyOtpSignup(email, otpController.text);
+      final result = await ApiService.verifyOtpSignup(
+        email,
+        otpController.text,
+      );
       if (!mounted) return {'status': 'error', 'message': 'Widget disposed'};
 
       _safeSetState(() {
@@ -267,7 +358,7 @@ class SignupScreenState extends State<SignupScreen>
     if (!otpSent) {
       final otpResult = await sendOtp();
       if (otpResult['status'] != 'success') return;
-      return; 
+      return;
     }
 
     if (otpSent && !otpVerified) {
@@ -300,8 +391,12 @@ class SignupScreenState extends State<SignupScreen>
           "address": addressController.text,
           "familyName": familyNameController.text,
           "familyPhone": familyPhoneController.text,
-          "roommateName": roommateNameController.text.trim().isEmpty ? null : roommateNameController.text,
-          "roommatePhone": roommatePhoneController.text.trim().isEmpty ? null : roommatePhoneController.text,
+          "roommateName": roommateNameController.text.trim().isEmpty
+              ? null
+              : roommateNameController.text,
+          "roommatePhone": roommatePhoneController.text.trim().isEmpty
+              ? null
+              : roommatePhoneController.text,
         };
       } else {
         data = {
@@ -325,22 +420,57 @@ class SignupScreenState extends State<SignupScreen>
       _safeSetState(() => _isSignupLoading = false);
 
       if (response['success']) {
-        _showSnackBar('Signup Successful!', false);
-        final userData = response['user'];
-        await Future.delayed(Duration(seconds: 1));
-        if (!mounted) return;
-
-        final role = userData['role']?.toString().toLowerCase() ?? 'user';
-        
-        if (role == 'user') {
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => UserHome()));
-        } else if (role == 'service_provider' || role == 'serviceprovider') {
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => ServiceProviderHome()));
+        // Check if this is a service provider approval request
+        if (selectedRole == 'Service Provider' &&
+            response['status'] == 'pending') {
+          // Show approval popup
+          _showApprovalPopup(response['spId']);
         } else {
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => UserHome()));
+          _showSnackBar('Signup Successful!', false);
+          final userData = response['user'];
+
+          // Validate response data before accessing
+          if (userData == null) {
+            _showSnackBar(
+              'Signup successful but account data missing. Please login manually.',
+              true,
+            );
+            Navigator.pushReplacementNamed(context, '/login');
+            return;
+          }
+
+          await Future.delayed(Duration(seconds: 1));
+          if (!mounted) return;
+
+          final role = userData['role']?.toString().toLowerCase() ?? 'user';
+
+          if (role == 'user') {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => UserHome()),
+            );
+          } else if (role == 'service_provider' || role == 'serviceprovider') {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => ServiceProviderHome()),
+            );
+          } else {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => UserHome()),
+            );
+          }
         }
       } else {
-        _showSnackBar(response['error'] ?? response['message'] ?? 'Signup Failed', true);
+        // Handle different error types
+        final errorMsg =
+            response['error'] ?? response['message'] ?? 'Signup Failed';
+
+        if (errorMsg.contains('already exists')) {
+          _showAccountExistsErrorDialog(errorMsg);
+        } else {
+          _showSnackBar(errorMsg, true);
+        }
       }
     } catch (e) {
       _safeSetState(() => _isSignupLoading = false);
@@ -358,6 +488,303 @@ class SignupScreenState extends State<SignupScreen>
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         margin: EdgeInsets.all(20),
       ),
+    );
+  }
+
+  void _showAccountExistsErrorDialog(String errorMessage) {
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Text(
+          'Account Already Exists',
+          style: GoogleFonts.poppins(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.red,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.info_outline, color: Colors.orange, size: 40),
+            SizedBox(height: 16),
+            Text(
+              'An account with this email already exists in our system.',
+              style: GoogleFonts.inter(fontSize: 14),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 12),
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                'The account might be from a previous signup or registration as a different account type.',
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  color: Colors.blue.shade700,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'What would you like to do?',
+              style: GoogleFonts.poppins(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: Text(
+              'Try Different Email',
+              style: GoogleFonts.inter(color: Colors.grey),
+            ),
+          ),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.pop(context);
+              // Navigate to login
+              Navigator.pushReplacementNamed(context, '/login');
+            },
+            icon: Icon(Icons.login),
+            label: Text(
+              'Go to Login',
+              style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFF635BFF),
+              foregroundColor: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showApprovalPopup(String spId) {
+    Timer? pollingTimer;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) {
+          // Start polling for approval status
+          pollingTimer = Timer.periodic(Duration(seconds: 10), (_) async {
+            if (!mounted) return;
+
+            try {
+              final response = await ApiService.get(
+                '/signup/service-provider/check-approval/$spId',
+              );
+
+              if (response['isApproved'] == true) {
+                pollingTimer?.cancel();
+                if (mounted) Navigator.pop(context);
+                _showSnackBar(
+                  'Account approved! Redirecting to login...',
+                  false,
+                );
+                await Future.delayed(Duration(seconds: 1));
+                if (mounted) {
+                  Navigator.pushReplacementNamed(context, '/login');
+                }
+              } else if (response['isRejected'] == true) {
+                pollingTimer?.cancel();
+                if (mounted) Navigator.pop(context);
+                _showSnackBar(
+                  'Your account was rejected. Please try again.',
+                  true,
+                );
+              }
+            } catch (e) {
+              print('Error checking approval status: $e');
+            }
+          });
+
+          return Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            backgroundColor: Colors.white,
+            child: Container(
+              padding: EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Color(0xFFFF9D42).withOpacity(0.1),
+                    ),
+                    child: Icon(
+                      Icons.pending_actions,
+                      size: 40,
+                      color: Color(0xFFFF9D42),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  Text(
+                    'Approval Request Submitted',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  SizedBox(height: 12),
+                  Text(
+                    'Our admin team will verify your credentials and approve your account shortly.',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      color: Colors.grey.shade600,
+                      height: 1.4,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: Color(0xFF2196F3).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '⏱️ Typically approved within 30 minutes',
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: Color(0xFF2196F3),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  Text(
+                    'What happens next:',
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  SizedBox(height: 12),
+                  _approvalStep(
+                    '1',
+                    'Verification',
+                    'We\'ll verify your information',
+                  ),
+                  SizedBox(height: 8),
+                  _approvalStep(
+                    '2',
+                    'Approval',
+                    'Admin will approve your account',
+                  ),
+                  SizedBox(height: 8),
+                  _approvalStep('3', 'Login', 'You\'ll be redirected to login'),
+                  SizedBox(height: 24),
+                  Text(
+                    'We\'re reviewing your application...',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      pollingTimer?.cancel();
+                      Navigator.pop(context);
+                      Navigator.pushReplacementNamed(context, '/login');
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey.shade200,
+                      foregroundColor: Colors.grey.shade800,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 32,
+                        vertical: 12,
+                      ),
+                    ),
+                    child: Text(
+                      'Go to Login',
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    ).then((value) => pollingTimer?.cancel());
+  }
+
+  Widget _approvalStep(String number, String title, String description) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 28,
+          height: 28,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Color(0xFFFF9D42),
+          ),
+          child: Center(
+            child: Text(
+              number,
+              style: GoogleFonts.poppins(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+        SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              Text(
+                description,
+                style: GoogleFonts.inter(
+                  fontSize: 11,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -379,17 +806,31 @@ class SignupScreenState extends State<SignupScreen>
               ),
             ),
           ),
-          
+
           // 2. Deco circles
           Positioned(
-            top: -60, left: -60,
-            child: Container(width: 200, height: 200, 
-              decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withOpacity(0.1))),
+            top: -60,
+            left: -60,
+            child: Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withOpacity(0.1),
+              ),
+            ),
           ),
           Positioned(
-            bottom: -60, right: -60,
-            child: Container(width: 150, height: 150, 
-              decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withOpacity(0.1))),
+            bottom: -60,
+            right: -60,
+            child: Container(
+              width: 150,
+              height: 150,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withOpacity(0.1),
+              ),
+            ),
           ),
 
           // 3. Glassmorphic Form
@@ -411,9 +852,15 @@ class SignupScreenState extends State<SignupScreen>
                           color: Colors.white.withOpacity(0.92),
                           borderRadius: BorderRadius.circular(24),
                           boxShadow: [
-                            BoxShadow(color: Colors.black12, blurRadius: 20, offset: Offset(0, 10))
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 20,
+                              offset: Offset(0, 10),
+                            ),
                           ],
-                          border: Border.all(color: Colors.white.withOpacity(0.6)),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.6),
+                          ),
                         ),
                         child: Form(
                           key: _formKey,
@@ -433,7 +880,9 @@ class SignupScreenState extends State<SignupScreen>
                               Text(
                                 "Join the community today",
                                 textAlign: TextAlign.center,
-                                style: GoogleFonts.inter(color: Colors.grey[600]),
+                                style: GoogleFonts.inter(
+                                  color: Colors.grey[600],
+                                ),
                               ),
                               SizedBox(height: 24),
 
@@ -447,7 +896,8 @@ class SignupScreenState extends State<SignupScreen>
                               SizedBox(height: 24),
 
                               if (selectedRole == "User") userForm(),
-                              if (selectedRole == "Service Provider") serviceProviderForm(),
+                              if (selectedRole == "Service Provider")
+                                serviceProviderForm(),
 
                               // OTP Section
                               if (otpSent && !otpVerified) ...[
@@ -457,24 +907,41 @@ class SignupScreenState extends State<SignupScreen>
                                   decoration: BoxDecoration(
                                     color: Color(0xFFFF9D42).withOpacity(0.1),
                                     borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(color: Color(0xFFFF9D42).withOpacity(0.3)),
+                                    border: Border.all(
+                                      color: Color(0xFFFF9D42).withOpacity(0.3),
+                                    ),
                                   ),
                                   child: Column(
                                     children: [
-                                      Text("OTP Verification", style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: Color(0xFFFF9D42))),
+                                      Text(
+                                        "OTP Verification",
+                                        style: GoogleFonts.poppins(
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFFFF9D42),
+                                        ),
+                                      ),
                                       SizedBox(height: 10),
                                       TextFormField(
                                         controller: otpController,
                                         keyboardType: TextInputType.number,
                                         maxLength: 6,
-                                        decoration: inputDecoration(hint: "Enter 6-digit OTP", isOutline: true)
-                                            .copyWith(counterText: "", prefixIcon: Icon(Icons.lock_clock, color: Color(0xFFFF9D42))),
+                                        decoration:
+                                            inputDecoration(
+                                              hint: "Enter 6-digit OTP",
+                                              isOutline: true,
+                                            ).copyWith(
+                                              counterText: "",
+                                              prefixIcon: Icon(
+                                                Icons.lock_clock,
+                                                color: Color(0xFFFF9D42),
+                                              ),
+                                            ),
                                       ),
                                     ],
                                   ),
                                 ),
                               ],
-                              
+
                               if (otpVerified) ...[
                                 SizedBox(height: 20),
                                 Container(
@@ -486,32 +953,61 @@ class SignupScreenState extends State<SignupScreen>
                                   ),
                                   child: Row(
                                     children: [
-                                      Icon(Icons.check_circle, color: Colors.green),
+                                      Icon(
+                                        Icons.check_circle,
+                                        color: Colors.green,
+                                      ),
                                       SizedBox(width: 8),
-                                      Text("Email Verified!", style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.green)),
+                                      Text(
+                                        "Email Verified!",
+                                        style: GoogleFonts.inter(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.green,
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ),
                               ],
 
                               SizedBox(height: 30),
-                              
+
                               if (selectedRole != null)
                                 SizedBox(
                                   height: 55,
                                   child: ElevatedButton(
-                                    onPressed: (_isSignupLoading || _isOtpLoading) ? null : _handleSignup,
+                                    onPressed:
+                                        (_isSignupLoading || _isOtpLoading)
+                                        ? null
+                                        : _handleSignup,
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: Color(0xFFFF9D42),
                                       foregroundColor: Colors.white,
                                       elevation: 4,
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
                                     ),
                                     child: (_isSignupLoading || _isOtpLoading)
-                                        ? SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                                        ? SizedBox(
+                                            width: 24,
+                                            height: 24,
+                                            child: CircularProgressIndicator(
+                                              color: Colors.white,
+                                              strokeWidth: 2,
+                                            ),
+                                          )
                                         : Text(
-                                            otpVerified ? "COMPLETE SIGNUP" : (otpSent ? "VERIFY OTP" : "SIGN UP & VERIFY"),
-                                            style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1),
+                                            otpVerified
+                                                ? "COMPLETE SIGNUP"
+                                                : (otpSent
+                                                      ? "VERIFY OTP"
+                                                      : "SIGN UP & VERIFY"),
+                                            style: GoogleFonts.poppins(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              letterSpacing: 1,
+                                            ),
                                           ),
                                   ),
                                 ),
@@ -520,10 +1016,26 @@ class SignupScreenState extends State<SignupScreen>
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text("Already have an account? ", style: GoogleFonts.inter(color: Colors.grey[600])),
+                                  Text(
+                                    "Already have an account? ",
+                                    style: GoogleFonts.inter(
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
                                   GestureDetector(
-                                    onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => LoginScreen())),
-                                    child: Text("Login", style: GoogleFonts.inter(color: Color(0xFFFF9D42), fontWeight: FontWeight.bold)),
+                                    onTap: () => Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => LoginScreen(),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      "Login",
+                                      style: GoogleFonts.inter(
+                                        color: Color(0xFFFF9D42),
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -562,7 +1074,15 @@ class SignupScreenState extends State<SignupScreen>
               color: isSelected ? Color(0xFFFF9D42) : Colors.transparent,
               width: 2,
             ),
-            boxShadow: isSelected ? [BoxShadow(color: Color(0xFFFF9D42).withOpacity(0.3), blurRadius: 8, offset: Offset(0, 4))] : [],
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: Color(0xFFFF9D42).withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: Offset(0, 4),
+                    ),
+                  ]
+                : [],
           ),
           alignment: Alignment.center,
           child: Text(
@@ -582,25 +1102,95 @@ class SignupScreenState extends State<SignupScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(children: [
-          Expanded(child: input(firstNameController, "First Name", icon: Icons.person_outline)),
-          SizedBox(width: 12),
-          Expanded(child: input(lastNameController, "Last Name", icon: Icons.person_outline)),
-        ]),
-        input(emailController, "Email", isEmail: true, icon: Icons.email_outlined),
+        Row(
+          children: [
+            Expanded(
+              child: input(
+                firstNameController,
+                "First Name",
+                icon: Icons.person_outline,
+              ),
+            ),
+            SizedBox(width: 12),
+            Expanded(
+              child: input(
+                lastNameController,
+                "Last Name",
+                icon: Icons.person_outline,
+              ),
+            ),
+          ],
+        ),
+        input(
+          emailController,
+          "Email",
+          isEmail: true,
+          icon: Icons.email_outlined,
+        ),
         passwordSection(passwordController),
-        input(confirmPasswordController, "Confirm Password", isPassword: true, original: passwordController, icon: Icons.lock_outline),
-        input(phoneController, "Phone", isPhone: true, icon: Icons.phone_android),
-        dropdown(userSelectedCity, pakistaniCities, (v) => _safeSetState(() => userSelectedCity = v!), "City", Icons.location_city),
+        input(
+          confirmPasswordController,
+          "Confirm Password",
+          isPassword: true,
+          original: passwordController,
+          icon: Icons.lock_outline,
+        ),
+        input(
+          phoneController,
+          "Phone",
+          isPhone: true,
+          icon: Icons.phone_android,
+        ),
+        dropdown(
+          userSelectedCity,
+          pakistaniCities,
+          (v) => _safeSetState(() => userSelectedCity = v!),
+          "City",
+          Icons.location_city,
+        ),
         input(addressController, "Address", icon: Icons.home_outlined),
         SizedBox(height: 12),
-        Text("Family info (Required)", style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.grey[700])),
-        input(familyNameController, "Family Member Name", icon: Icons.people_outline),
-        input(familyPhoneController, "Family Phone", isPhone: true, icon: Icons.phone),
+        Text(
+          "Family info (Required)",
+          style: GoogleFonts.inter(
+            fontWeight: FontWeight.bold,
+            fontSize: 13,
+            color: Colors.grey[700],
+          ),
+        ),
+        input(
+          familyNameController,
+          "Family Member Name",
+          icon: Icons.people_outline,
+        ),
+        input(
+          familyPhoneController,
+          "Family Phone",
+          isPhone: true,
+          icon: Icons.phone,
+        ),
         SizedBox(height: 12),
-        Text("Roommate info (Optional)", style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.grey[700])),
-        input(roommateNameController, "Roommate Name", isRequired: false, icon: Icons.person),
-        input(roommatePhoneController, "Roommate Phone", isPhone: true, isRequired: false, icon: Icons.phone),
+        Text(
+          "Roommate info (Optional)",
+          style: GoogleFonts.inter(
+            fontWeight: FontWeight.bold,
+            fontSize: 13,
+            color: Colors.grey[700],
+          ),
+        ),
+        input(
+          roommateNameController,
+          "Roommate Name",
+          isRequired: false,
+          icon: Icons.person,
+        ),
+        input(
+          roommatePhoneController,
+          "Roommate Phone",
+          isPhone: true,
+          isRequired: false,
+          icon: Icons.phone,
+        ),
       ],
     );
   }
@@ -609,72 +1199,163 @@ class SignupScreenState extends State<SignupScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(children: [
-          Expanded(child: input(spFirstNameController, "First Name", icon: Icons.person_outline)),
-          SizedBox(width: 12),
-          Expanded(child: input(spLastNameController, "Last Name", icon: Icons.person_outline)),
-        ]),
-        input(spEmailController, "Email", isEmail: true, icon: Icons.email_outlined),
+        Row(
+          children: [
+            Expanded(
+              child: input(
+                spFirstNameController,
+                "First Name",
+                icon: Icons.person_outline,
+              ),
+            ),
+            SizedBox(width: 12),
+            Expanded(
+              child: input(
+                spLastNameController,
+                "Last Name",
+                icon: Icons.person_outline,
+              ),
+            ),
+          ],
+        ),
+        input(
+          spEmailController,
+          "Email",
+          isEmail: true,
+          icon: Icons.email_outlined,
+        ),
         passwordSection(spPasswordController),
-        input(spConfirmPasswordController, "Confirm Password", isPassword: true, original: spPasswordController, icon: Icons.lock_outline),
-        input(spPhoneController, "Phone", isPhone: true, icon: Icons.phone_android),
-        dropdown(spSelectedCity, pakistaniCities, (v) => _safeSetState(() => spSelectedCity = v!), "City", Icons.location_city),
+        input(
+          spConfirmPasswordController,
+          "Confirm Password",
+          isPassword: true,
+          original: spPasswordController,
+          icon: Icons.lock_outline,
+        ),
+        input(
+          spPhoneController,
+          "Phone",
+          isPhone: true,
+          icon: Icons.phone_android,
+        ),
+        dropdown(
+          spSelectedCity,
+          pakistaniCities,
+          (v) => _safeSetState(() => spSelectedCity = v!),
+          "City",
+          Icons.location_city,
+        ),
         input(spAddressController, "Address", icon: Icons.home_outlined),
         input(spDistrictNameController, "District Name", icon: Icons.map),
-        input(spDistrictNazimController, "District Nazim Name", icon: Icons.person_pin),
-        dropdown(spSubRole, ['Meal Provider', 'Hostel/Flat Accommodation', 'Laundry', 'Maintenance'], 
-                (v) => _safeSetState(() => spSubRole = v!), "Service Type", Icons.work_outline),
+        input(
+          spDistrictNazimController,
+          "District Nazim Name",
+          icon: Icons.person_pin,
+        ),
+        dropdown(
+          spSubRole,
+          [
+            'Meal Provider',
+            'Hostel/Flat Accommodation',
+            'Laundry',
+            'Maintenance',
+          ],
+          (v) => _safeSetState(() => spSubRole = v!),
+          "Service Type",
+          Icons.work_outline,
+        ),
       ],
     );
   }
 
-  Widget input(TextEditingController controller, String label, {
-    bool isEmail = false, bool isPhone = false, bool isRequired = true, bool isPassword = false, 
-    TextEditingController? original, IconData? icon
+  Widget input(
+    TextEditingController controller,
+    String label, {
+    bool isEmail = false,
+    bool isPhone = false,
+    bool isRequired = true,
+    bool isPassword = false,
+    TextEditingController? original,
+    IconData? icon,
   }) {
     return Padding(
       padding: EdgeInsets.only(bottom: 16),
       child: TextFormField(
         controller: controller,
-        obscureText: isPassword ? (original != null ? !confirmPasswordVisible : !passwordVisible) : false,
+        obscureText: isPassword
+            ? (original != null ? !confirmPasswordVisible : !passwordVisible)
+            : false,
         keyboardType: isPhone ? TextInputType.phone : TextInputType.text,
+        inputFormatters: isPhone
+            ? [FilteringTextInputFormatter.digitsOnly]
+            : [],
         style: GoogleFonts.inter(fontSize: 14),
         decoration: inputDecoration(hint: label, isOutline: false).copyWith(
-          prefixIcon: icon != null ? Icon(icon, color: Colors.grey[500], size: 20) : null,
-          suffixIcon: isPassword ? IconButton(
-            icon: Icon(original != null 
-              ? (confirmPasswordVisible ? Icons.visibility : Icons.visibility_off)
-              : (passwordVisible ? Icons.visibility : Icons.visibility_off), color: Colors.grey),
-            onPressed: () => _safeSetState(() {
-              if (original != null) {
-                confirmPasswordVisible = !confirmPasswordVisible;
-              } else {
-                passwordVisible = !passwordVisible;
-              }
-            }),
-          ) : null,
+          prefixIcon: icon != null
+              ? Icon(icon, color: Colors.grey[500], size: 20)
+              : null,
+          suffixIcon: isPassword
+              ? IconButton(
+                  icon: Icon(
+                    original != null
+                        ? (confirmPasswordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off)
+                        : (passwordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off),
+                    color: Colors.grey,
+                  ),
+                  onPressed: () => _safeSetState(() {
+                    if (original != null) {
+                      confirmPasswordVisible = !confirmPasswordVisible;
+                    } else {
+                      passwordVisible = !passwordVisible;
+                    }
+                  }),
+                )
+              : null,
         ),
-        validator: isRequired ? (value) {
-          if (value == null || value.isEmpty) return "$label is required";
-          if (isEmail && !value.endsWith('@gmail.com')) return "Only Gmail allowed";
-          if (isPhone && !RegExp(r'^\d{11}$').hasMatch(value)) return "Phone must be 11 digits";
-          if (isPassword && original != null && value != original.text) return "Passwords do not match";
-          return null;
-        } : null,
+        validator: isRequired
+            ? (value) {
+                if (value == null || value.isEmpty) return "$label is required";
+                if (isEmail && !value.endsWith('@gmail.com'))
+                  return "Only Gmail allowed";
+                if (isPhone && !RegExp(r'^\d{11}$').hasMatch(value))
+                  return "Phone must be 11 digits";
+                if (isPassword && original != null && value != original.text)
+                  return "Passwords do not match";
+                return null;
+              }
+            : null,
       ),
     );
   }
 
-  Widget dropdown(String value, List<String> items, ValueChanged<String?> onChanged, String label, IconData icon) {
+  Widget dropdown(
+    String value,
+    List<String> items,
+    ValueChanged<String?> onChanged,
+    String label,
+    IconData icon,
+  ) {
     return Padding(
       padding: EdgeInsets.only(bottom: 16),
       child: DropdownButtonFormField<String>(
         initialValue: value,
-        items: items.map((e) => DropdownMenuItem(value: e, child: Text(e, style: GoogleFonts.inter(fontSize: 14)))).toList(),
+        items: items
+            .map(
+              (e) => DropdownMenuItem(
+                value: e,
+                child: Text(e, style: GoogleFonts.inter(fontSize: 14)),
+              ),
+            )
+            .toList(),
         onChanged: onChanged,
-        decoration: inputDecoration(hint: label, isOutline: false).copyWith(
-          prefixIcon: Icon(icon, color: Colors.grey[500], size: 20),
-        ),
+        decoration: inputDecoration(
+          hint: label,
+          isOutline: false,
+        ).copyWith(prefixIcon: Icon(icon, color: Colors.grey[500], size: 20)),
       ),
     );
   }
@@ -683,7 +1364,12 @@ class SignupScreenState extends State<SignupScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        input(controller, "Password", isPassword: true, icon: Icons.lock_outline),
+        input(
+          controller,
+          "Password",
+          isPassword: true,
+          icon: Icons.lock_outline,
+        ),
         if (controller.text.isNotEmpty)
           Padding(
             padding: EdgeInsets.only(bottom: 16, left: 4, right: 4),
@@ -698,7 +1384,14 @@ class SignupScreenState extends State<SignupScreen>
                   ),
                 ),
                 SizedBox(width: 10),
-                Text(passwordText, style: GoogleFonts.inter(color: strengthColor, fontWeight: FontWeight.bold, fontSize: 12)),
+                Text(
+                  passwordText,
+                  style: GoogleFonts.inter(
+                    color: strengthColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
               ],
             ),
           ),
@@ -706,7 +1399,10 @@ class SignupScreenState extends State<SignupScreen>
     );
   }
 
-  InputDecoration inputDecoration({required String hint, required bool isOutline}) {
+  InputDecoration inputDecoration({
+    required String hint,
+    required bool isOutline,
+  }) {
     return InputDecoration(
       labelText: hint,
       filled: true,

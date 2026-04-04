@@ -145,9 +145,8 @@ class _HomeHeaderState extends State<HomeHeader>
   }
 
   String _getUserInitials() {
-    final name = widget.userData?['username'] ??
-        widget.userData?['firstName'] ??
-        '';
+    final name =
+        widget.userData?['username'] ?? widget.userData?['firstName'] ?? '';
     if (name.isEmpty) return 'U';
     final parts = name.toString().trim().split(' ');
     if (parts.length >= 2) {
@@ -161,90 +160,104 @@ class _HomeHeaderState extends State<HomeHeader>
     final topPadding = MediaQuery.of(context).padding.top;
 
     return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            _deepOrange,
-            _primaryOrange,
-            _accentAmber.withOpacity(0.95),
-          ],
-          stops: const [0.0, 0.5, 1.0],
-        ),
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(32),
-          bottomRight: Radius.circular(32),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: _primaryOrange.withOpacity(0.35),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                _deepOrange,
+                _primaryOrange,
+                _accentAmber.withOpacity(0.95),
+              ],
+              stops: const [0.0, 0.5, 1.0],
+            ),
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(32),
+              bottomRight: Radius.circular(32),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: _primaryOrange.withOpacity(0.35),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(32),
-          bottomRight: Radius.circular(32),
-        ),
-        child: Stack(
-          children: [
-            // Subtle decorative circles in background
-            Positioned(
-              top: -30,
-              right: -40,
-              child: Container(
-                width: 140,
-                height: 140,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.06),
-                ),
-              ),
+          child: ClipRRect(
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(32),
+              bottomRight: Radius.circular(32),
             ),
-            Positioned(
-              bottom: 20,
-              left: -30,
-              child: Container(
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.04),
+            child: Stack(
+              children: [
+                // Subtle decorative circles in background
+                Positioned(
+                  top: -30,
+                  right: -40,
+                  child: Container(
+                    width: 140,
+                    height: 140,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withOpacity(0.06),
+                    ),
+                  ),
                 ),
-              ),
-            ),
+                Positioned(
+                  bottom: 20,
+                  left: -30,
+                  child: Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withOpacity(0.04),
+                    ),
+                  ),
+                ),
 
-            // Main content
-            Padding(
-              padding: EdgeInsets.fromLTRB(20, topPadding + 12, 20, 20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Top row: Avatar | Location | Menu
-                  _buildTopRow(),
-                  const SizedBox(height: 20),
-                  // Search bar
-                  _buildSearchBar(),
-                ],
-              ),
+                // Main content
+                Padding(
+                  padding: EdgeInsets.fromLTRB(20, topPadding + 12, 20, 12),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Top row: Avatar | Location | Menu
+                      _buildTopRow(),
+                      const SizedBox(height: 12),
+                      // Search bar
+                      _buildSearchBar(),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-    ).animate().fadeIn(duration: 500.ms).slideY(begin: -0.15, end: 0, duration: 500.ms, curve: Curves.easeOutCubic);
+          ),
+        )
+        .animate()
+        .fadeIn(duration: 500.ms)
+        .slideY(
+          begin: -0.15,
+          end: 0,
+          duration: 500.ms,
+          curve: Curves.easeOutCubic,
+        );
   }
 
   Widget _buildTopRow() {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Profile Avatar
         _buildProfileAvatar()
             .animate()
             .fadeIn(delay: 200.ms, duration: 400.ms)
-            .scale(begin: const Offset(0.8, 0.8), end: const Offset(1, 1), delay: 200.ms, duration: 400.ms),
+            .scale(
+              begin: const Offset(0.8, 0.8),
+              end: const Offset(1, 1),
+              delay: 200.ms,
+              duration: 400.ms,
+            ),
 
         const SizedBox(width: 14),
 
@@ -262,7 +275,12 @@ class _HomeHeaderState extends State<HomeHeader>
         _buildMenuButton()
             .animate()
             .fadeIn(delay: 400.ms, duration: 400.ms)
-            .scale(begin: const Offset(0.8, 0.8), end: const Offset(1, 1), delay: 400.ms, duration: 400.ms),
+            .scale(
+              begin: const Offset(0.8, 0.8),
+              end: const Offset(1, 1),
+              delay: 400.ms,
+              duration: 400.ms,
+            ),
       ],
     );
   }
@@ -274,7 +292,10 @@ class _HomeHeaderState extends State<HomeHeader>
         padding: const EdgeInsets.all(2.5),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: Colors.white.withOpacity(0.7), width: 2),
+          border: Border.all(
+            color: const Color.fromARGB(255, 0, 0, 0).withOpacity(0.7),
+            width: 2,
+          ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.15),
@@ -291,7 +312,7 @@ class _HomeHeaderState extends State<HomeHeader>
             style: GoogleFonts.poppins(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: const Color.fromARGB(255, 0, 0, 0),
             ),
           ),
         ),
@@ -305,6 +326,25 @@ class _HomeHeaderState extends State<HomeHeader>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // Logo Image
+          Container(
+            height: 120,
+            width: 190,
+
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.asset(
+                'assets/images/Logo1.png',
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) => Icon(
+                  Icons.location_on_rounded,
+                  color: const Color.fromARGB(255, 0, 0, 0),
+                  size: 24,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
           // "Current Location" label
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -315,7 +355,7 @@ class _HomeHeaderState extends State<HomeHeader>
                 style: GoogleFonts.inter(
                   fontSize: 11,
                   fontWeight: FontWeight.w500,
-                  color: Colors.white.withOpacity(0.85),
+                  color: const Color.fromARGB(255, 0, 0, 0).withOpacity(0.85),
                   letterSpacing: 0.3,
                 ),
               ),
@@ -323,7 +363,7 @@ class _HomeHeaderState extends State<HomeHeader>
               Icon(
                 Icons.keyboard_arrow_down_rounded,
                 size: 16,
-                color: Colors.white.withOpacity(0.85),
+                color: const Color.fromARGB(255, 0, 0, 0).withOpacity(0.85),
               ),
             ],
           ),
@@ -338,7 +378,7 @@ class _HomeHeaderState extends State<HomeHeader>
                     Icon(
                       Icons.location_on_rounded,
                       size: 14,
-                      color: Colors.white,
+                      color: const Color.fromARGB(255, 0, 0, 0),
                     ),
                     const SizedBox(width: 4),
                     Flexible(
@@ -347,7 +387,7 @@ class _HomeHeaderState extends State<HomeHeader>
                         style: GoogleFonts.poppins(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                          color: const Color.fromARGB(255, 0, 0, 0),
                         ),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
@@ -369,7 +409,7 @@ class _HomeHeaderState extends State<HomeHeader>
           height: 16,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
-            color: Colors.white.withOpacity(0.2),
+            color: const Color.fromARGB(255, 0, 0, 0).withOpacity(0.2),
           ),
         );
       },
@@ -382,16 +422,16 @@ class _HomeHeaderState extends State<HomeHeader>
       child: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.15),
+          color: const Color.fromARGB(255, 0, 0, 0).withOpacity(0.15),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: Colors.white.withOpacity(0.2),
+            color: const Color.fromARGB(255, 0, 0, 0).withOpacity(0.2),
             width: 1,
           ),
         ),
         child: const Icon(
           Icons.menu_rounded,
-          color: Colors.white,
+          color: Color.fromARGB(255, 0, 0, 0),
           size: 22,
         ),
       ),
@@ -400,47 +440,58 @@ class _HomeHeaderState extends State<HomeHeader>
 
   Widget _buildSearchBar() {
     return GestureDetector(
-      onTap: widget.onSearchTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.25),
-            width: 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Icon(
-              Icons.search_rounded,
-              color: Colors.white.withOpacity(0.9),
-              size: 22,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                'Search housing, meals, laundry, maintenance…',
-                style: GoogleFonts.inter(
-                  fontSize: 13.5,
-                  color: Colors.white.withOpacity(0.75),
-                  fontWeight: FontWeight.w400,
-                ),
-                overflow: TextOverflow.ellipsis,
+          onTap: widget.onSearchTap,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+            decoration: BoxDecoration(
+              color: const Color.fromARGB(255, 255, 255, 255).withOpacity(0.2),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: const Color.fromARGB(255, 0, 0, 0).withOpacity(0.25),
+                width: 1,
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color.fromARGB(
+                    255,
+                    255,
+                    255,
+                    255,
+                  ).withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-    ).animate()
+            child: Row(
+              children: [
+                Icon(
+                  Icons.search_rounded,
+                  color: const Color.fromARGB(255, 0, 0, 0).withOpacity(0.9),
+                  size: 22,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Search housing, meals, laundry, maintenance…',
+                    style: GoogleFonts.inter(
+                      fontSize: 13.5,
+                      color: const Color.fromARGB(
+                        255,
+                        0,
+                        0,
+                        0,
+                      ).withOpacity(0.75),
+                      fontWeight: FontWeight.w400,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        )
+        .animate()
         .fadeIn(delay: 500.ms, duration: 400.ms)
         .slideY(begin: 0.2, end: 0, delay: 500.ms, duration: 400.ms);
   }

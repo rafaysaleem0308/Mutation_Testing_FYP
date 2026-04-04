@@ -48,11 +48,13 @@ class ApiResponse {
 class ApiService {
   static String get baseUrl {
     if (Platform.isAndroid) {
-      //return "http://192.168.100.89:3000"; // Physical Device IP
-      return "http://10.0.2:3000"; // Android Emulator (user's machine IP if using physical device)
+      // Android Emulator: 10.0.2.2 = host's localhost
+      return "http://10.0.2.2:3000";
+      // For physical device on same network, use:
+      // return "http://192.168.x.x:3000"; // Replace with your machine's local IP
     }
     return "http://127.0.0.1:3000";
-  } // Local development
+  } // Local development (iOS)
   // static const String baseUrl = "https://your-production-api.com"; // Production
 
   // ================================
@@ -101,6 +103,16 @@ class ApiService {
           responseData,
           'message',
           defaultValue: 'Failed to send OTP',
+        ),
+        'suggestion': ApiResponse.safeGet(
+          responseData,
+          'suggestion',
+          defaultValue: null,
+        ),
+        'existingAccountType': ApiResponse.safeGet(
+          responseData,
+          'existingAccountType',
+          defaultValue: null,
         ),
       };
     } catch (error) {
@@ -2068,6 +2080,57 @@ class ApiService {
       await SessionManager.saveTokens(accessToken: token, refreshToken: '');
     } catch (e) {
       // Silently fail
+    }
+  }
+
+  // ================================
+  // GENERIC GET METHOD FOR API CALLS
+  // ================================
+  static Future<Map<String, dynamic>> get(String endpoint) async {
+    try {
+      // Build full URL - handle both /api prefixed and non-prefixed paths
+      String url;
+      if (endpoint.startsWith('http')) {
+        url = endpoint;
+      } else if (endpoint.startsWith('/api/') ||
+          endpoint.startsWith('/signup/') ||
+          endpoint.startsWith('/auth')) {
+        // These endpoints don't need /api prefix
+        url = '$baseUrl$endpoint';
+      } else {
+        // Default endpoints get /api prefix
+        url = '$baseUrl/api$endpoint';
+      }
+
+      final headers = {'Content-Type': 'application/json'};
+
+      // Try to get token for authorization
+      final token = await getToken();
+      if (token != null) {
+        headers['Authorization'] = 'Bearer $token';
+      }
+
+      print('GET request to: $url');
+
+      final response = await http.get(Uri.parse(url), headers: headers);
+
+      print('GET response status: ${response.statusCode}');
+      print('GET response body: ${response.body}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final responseData = json.decode(response.body);
+        return responseData is Map<String, dynamic>
+            ? responseData
+            : {'data': responseData};
+      } else {
+        return {
+          'success': false,
+          'message': 'API Error: ${response.statusCode}',
+        };
+      }
+    } catch (error) {
+      print('GET error: $error');
+      return {'success': false, 'message': 'Network error: $error'};
     }
   }
 

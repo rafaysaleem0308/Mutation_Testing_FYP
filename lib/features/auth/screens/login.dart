@@ -45,10 +45,13 @@ class _LoginScreenState extends State<LoginScreen>
       CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
     );
 
-    _slideAnimation = Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero)
-        .animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeOutQuart),
-    );
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeOutQuart,
+          ),
+        );
 
     _animationController.forward();
     _loadSavedAccount();
@@ -65,7 +68,9 @@ class _LoginScreenState extends State<LoginScreen>
   /// Load saved account to show "Continue as" option
   Future<void> _loadSavedAccount() async {
     final saved = await SessionManager.getSavedAccount();
-    if (saved != null && saved['email'] != null && saved['email'].toString().isNotEmpty) {
+    if (saved != null &&
+        saved['email'] != null &&
+        saved['email'].toString().isNotEmpty) {
       if (mounted) {
         setState(() {
           _savedAccount = saved;
@@ -104,7 +109,13 @@ class _LoginScreenState extends State<LoginScreen>
       }
     } else {
       setState(() => _isAutoLogging = false);
-      _showSnackBar('Session expired. Please enter your password.', Colors.orange);
+      // Clear saved account since session refresh failed (account may be deleted)
+      await SessionManager.clearSavedAccount();
+      setState(() => _savedAccount = null);
+      _showSnackBar(
+        'Session expired. Please enter your password.',
+        Colors.orange,
+      );
     }
   }
 
@@ -157,7 +168,18 @@ class _LoginScreenState extends State<LoginScreen>
           );
         }
       } else {
-        _showSnackBar(response['message'] ?? 'Login failed', Colors.red);
+        final errorMsg = response['message'] ?? 'Login failed';
+        _showSnackBar(errorMsg, Colors.red);
+
+        // Clear saved account if account not found in database (deleted or doesn't exist)
+        if (errorMsg.toLowerCase().contains('not found') ||
+            errorMsg.toLowerCase().contains('invalid email') ||
+            errorMsg.toLowerCase().contains('does not exist')) {
+          await SessionManager.clearSavedAccount();
+          if (mounted) {
+            setState(() => _savedAccount = null);
+          }
+        }
       }
     }
   }
@@ -183,7 +205,9 @@ class _LoginScreenState extends State<LoginScreen>
     final lastName = _savedAccount!['lastName'] ?? '';
     final email = _savedAccount!['email'] ?? '';
     final name = '$firstName $lastName'.trim();
-    final initials = '${firstName.isNotEmpty ? firstName[0] : ''}${lastName.isNotEmpty ? lastName[0] : ''}'.toUpperCase();
+    final initials =
+        '${firstName.isNotEmpty ? firstName[0] : ''}${lastName.isNotEmpty ? lastName[0] : ''}'
+            .toUpperCase();
     final profileImage = _savedAccount!['profileImage']?.toString() ?? '';
 
     return Column(
@@ -308,10 +332,7 @@ class _LoginScreenState extends State<LoginScreen>
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Text(
                 "or login with password",
-                style: GoogleFonts.inter(
-                  color: Colors.grey[400],
-                  fontSize: 12,
-                ),
+                style: GoogleFonts.inter(color: Colors.grey[400], fontSize: 12),
               ),
             ),
             Expanded(child: Divider(color: Colors.grey[300])),
@@ -333,10 +354,7 @@ class _LoginScreenState extends State<LoginScreen>
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFFFF9D42),
-                  Color(0xFFFF512F),
-                ],
+                colors: [Color(0xFFFF9D42), Color(0xFFFF512F)],
               ),
             ),
           ),
@@ -414,7 +432,7 @@ class _LoginScreenState extends State<LoginScreen>
                                       BoxShadow(
                                         color: Colors.black12,
                                         blurRadius: 10,
-                                      )
+                                      ),
                                     ],
                                   ),
                                   padding: const EdgeInsets.all(12),
@@ -454,15 +472,19 @@ class _LoginScreenState extends State<LoginScreen>
                                 style: GoogleFonts.inter(color: Colors.black87),
                                 decoration: InputDecoration(
                                   labelText: "Email",
-                                  prefixIcon: Icon(Icons.email_outlined,
-                                      color: const Color(0xFFFF9D42)),
+                                  prefixIcon: Icon(
+                                    Icons.email_outlined,
+                                    color: const Color(0xFFFF9D42),
+                                  ),
                                   filled: true,
                                   fillColor: Colors.grey[50],
                                 ),
                                 validator: (value) {
-                                  if (value!.isEmpty) return "Email is required";
-                                  if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                                      .hasMatch(value)) {
+                                  if (value!.isEmpty)
+                                    return "Email is required";
+                                  if (!RegExp(
+                                    r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                                  ).hasMatch(value)) {
                                     return "Enter valid email";
                                   }
                                   return null;
@@ -477,8 +499,10 @@ class _LoginScreenState extends State<LoginScreen>
                                 style: GoogleFonts.inter(color: Colors.black87),
                                 decoration: InputDecoration(
                                   labelText: "Password",
-                                  prefixIcon: Icon(Icons.lock_outline,
-                                      color: const Color(0xFFFF9D42)),
+                                  prefixIcon: Icon(
+                                    Icons.lock_outline,
+                                    color: const Color(0xFFFF9D42),
+                                  ),
                                   suffixIcon: IconButton(
                                     icon: Icon(
                                       passwordVisible
@@ -487,13 +511,15 @@ class _LoginScreenState extends State<LoginScreen>
                                       color: Colors.grey,
                                     ),
                                     onPressed: () => setState(
-                                        () => passwordVisible = !passwordVisible),
+                                      () => passwordVisible = !passwordVisible,
+                                    ),
                                   ),
                                   filled: true,
                                   fillColor: Colors.grey[50],
                                 ),
-                                validator: (val) =>
-                                    val!.isEmpty ? "Password is required" : null,
+                                validator: (val) => val!.isEmpty
+                                    ? "Password is required"
+                                    : null,
                               ),
 
                               Align(
@@ -503,7 +529,8 @@ class _LoginScreenState extends State<LoginScreen>
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (_) => ForgotPasswordScreen()),
+                                        builder: (_) => ForgotPasswordScreen(),
+                                      ),
                                     );
                                   },
                                   child: Text(
@@ -527,8 +554,9 @@ class _LoginScreenState extends State<LoginScreen>
                                     backgroundColor: const Color(0xFFFF9D42),
                                     foregroundColor: Colors.white,
                                     elevation: 5,
-                                    shadowColor: const Color(0xFFFF9D42)
-                                        .withValues(alpha: 0.4),
+                                    shadowColor: const Color(
+                                      0xFFFF9D42,
+                                    ).withValues(alpha: 0.4),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(16),
                                     ),
@@ -538,8 +566,9 @@ class _LoginScreenState extends State<LoginScreen>
                                           height: 24,
                                           width: 24,
                                           child: CircularProgressIndicator(
-                                              color: Colors.white,
-                                              strokeWidth: 2),
+                                            color: Colors.white,
+                                            strokeWidth: 2,
+                                          ),
                                         )
                                       : Text(
                                           "LOGIN",
@@ -560,14 +589,16 @@ class _LoginScreenState extends State<LoginScreen>
                                   Text(
                                     "New user? ",
                                     style: GoogleFonts.inter(
-                                        color: Colors.grey[600]),
+                                      color: Colors.grey[600],
+                                    ),
                                   ),
                                   GestureDetector(
                                     onTap: () {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                            builder: (_) => SignupScreen()),
+                                          builder: (_) => SignupScreen(),
+                                        ),
                                       );
                                     },
                                     child: Text(

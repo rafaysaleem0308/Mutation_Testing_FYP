@@ -112,10 +112,6 @@ class StripePaymentService {
           style: ThemeMode
               .light, // Forced Light mode to bypass MIUI Dark Mode unclickable bug
           allowsDelayedPaymentMethods: false,
-          billingDetailsCollectionLevel: CollectionMode.automatic,
-          defaultBillingDetails: const BillingDetails(
-            address: Address(country: 'PK'),
-          ),
         ),
       );
     } catch (e) {

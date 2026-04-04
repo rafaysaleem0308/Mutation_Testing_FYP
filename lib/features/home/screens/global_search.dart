@@ -15,7 +15,13 @@ class _GlobalSearchScreenState extends State<GlobalSearchScreen> {
   String _selectedCategory = 'All';
   List<dynamic> _results = [];
   bool _isLoading = false;
-  final List<String> _categories = ['All', 'Meal', 'Laundry', 'Housing', 'Maintenance'];
+  final List<String> _categories = [
+    'All',
+    'Meal',
+    'Laundry',
+    'Housing',
+    'Maintenance',
+  ];
 
   @override
   void initState() {
@@ -29,13 +35,12 @@ class _GlobalSearchScreenState extends State<GlobalSearchScreen> {
       String? backendCategory;
       if (_selectedCategory == 'Meal') backendCategory = 'Meal Provider';
       if (_selectedCategory == 'Laundry') backendCategory = 'Laundry';
-      if (_selectedCategory == 'Housing') backendCategory = 'Hostel/Flat Accommodation';
+      if (_selectedCategory == 'Housing')
+        backendCategory = 'Hostel/Flat Accommodation';
       if (_selectedCategory == 'Maintenance') backendCategory = 'Maintenance';
 
-      final List<Map<String, dynamic>> searchResults = await ApiService.searchServices(
-        query,
-        backendCategory,
-      );
+      final List<Map<String, dynamic>> searchResults =
+          await ApiService.searchServices(query, backendCategory);
 
       if (mounted) {
         setState(() {
@@ -74,9 +79,13 @@ class _GlobalSearchScreenState extends State<GlobalSearchScreen> {
             _buildSearchHeader(),
             _buildCategoryFilters(),
             Expanded(
-              child: _isLoading 
-                ? Center(child: CircularProgressIndicator(color: Color(0xFFFF9D42)))
-                : _results.isEmpty 
+              child: _isLoading
+                  ? Center(
+                      child: CircularProgressIndicator(
+                        color: Color(0xFFFF9D42),
+                      ),
+                    )
+                  : _results.isEmpty
                   ? _buildEmptyState()
                   : _buildResultsList(),
             ),
@@ -92,21 +101,65 @@ class _GlobalSearchScreenState extends State<GlobalSearchScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Search Services", style: GoogleFonts.poppins(fontSize: 28, fontWeight: FontWeight.bold)),
+          // Back Button
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 12,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.arrow_back_ios_new,
+                color: Colors.black87,
+                size: 20,
+              ),
+            ),
+          ),
+          SizedBox(height: 16),
+          Text(
+            "Search Services",
+            style: GoogleFonts.poppins(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           SizedBox(height: 20),
           Container(
             decoration: BoxDecoration(
-              color: Colors.white, borderRadius: BorderRadius.circular(20),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 20, offset: Offset(0, 4))],
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 20,
+                  offset: Offset(0, 4),
+                ),
+              ],
             ),
             child: TextField(
               controller: _searchController,
               onChanged: _performSearch,
               decoration: InputDecoration(
                 hintText: "Search for providers...",
-                prefixIcon: Icon(Icons.search_rounded, color: Color(0xFFFF9D42)),
+                prefixIcon: Icon(
+                  Icons.search_rounded,
+                  color: Color(0xFFFF9D42),
+                ),
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 15,
+                ),
               ),
             ),
           ),
@@ -135,9 +188,23 @@ class _GlobalSearchScreenState extends State<GlobalSearchScreen> {
               decoration: BoxDecoration(
                 color: isSelected ? Color(0xFFFF9D42) : Colors.white,
                 borderRadius: BorderRadius.circular(25),
-                boxShadow: isSelected ? [BoxShadow(color: Color(0xFFFF9D42).withOpacity(0.3), blurRadius: 8)] : [],
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: Color(0xFFFF9D42).withOpacity(0.3),
+                          blurRadius: 8,
+                        ),
+                      ]
+                    : [],
               ),
-              child: Text(_categories[i], style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.bold, color: isSelected ? Colors.white : Colors.grey[600])),
+              child: Text(
+                _categories[i],
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: isSelected ? Colors.white : Colors.grey[600],
+                ),
+              ),
             ),
           );
         },
@@ -152,7 +219,10 @@ class _GlobalSearchScreenState extends State<GlobalSearchScreen> {
         children: [
           Icon(Icons.search_off_rounded, size: 80, color: Colors.grey[300]),
           SizedBox(height: 16),
-          Text("No services found", style: GoogleFonts.poppins(fontSize: 18, color: Colors.grey[400])),
+          Text(
+            "No services found",
+            style: GoogleFonts.poppins(fontSize: 18, color: Colors.grey[400]),
+          ),
         ],
       ),
     );
@@ -169,7 +239,8 @@ class _GlobalSearchScreenState extends State<GlobalSearchScreen> {
 
   Widget _buildResultCard(dynamic item, int index) {
     String serviceName = item['serviceName'] ?? item['name'] ?? 'Service';
-    String providerName = item['serviceProviderName'] ?? item['providerName'] ?? 'Provider';
+    String providerName =
+        item['serviceProviderName'] ?? item['providerName'] ?? 'Provider';
     String type = item['serviceType'] ?? 'Service';
     String price = item['price']?.toString() ?? '0';
     String unit = item['unit'] ?? '';
@@ -180,31 +251,71 @@ class _GlobalSearchScreenState extends State<GlobalSearchScreen> {
         margin: EdgeInsets.only(bottom: 16),
         padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white, borderRadius: BorderRadius.circular(24),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: Offset(0, 4))],
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 10,
+              offset: Offset(0, 4),
+            ),
+          ],
         ),
         child: Row(
           children: [
             Container(
               padding: EdgeInsets.all(12),
-              decoration: BoxDecoration(color: Color(0xFFFF9D42).withOpacity(0.1), shape: BoxShape.circle),
-              child: Icon(_getCategoryIcon(type), color: Color(0xFFFF9D42), size: 24),
+              decoration: BoxDecoration(
+                color: Color(0xFFFF9D42).withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                _getCategoryIcon(type),
+                color: Color(0xFFFF9D42),
+                size: 24,
+              ),
             ),
             SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(serviceName, style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold)),
-                  Text("By $providerName", style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[600])),
+                  Text(
+                    serviceName,
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    "By $providerName",
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
+                  ),
                 ],
               ),
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text("PKR $price", style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFFFF9D42))),
-                if (unit.isNotEmpty) Text("per $unit", style: GoogleFonts.inter(fontSize: 10, color: Colors.grey[400])),
+                Text(
+                  "PKR $price",
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFFFF9D42),
+                  ),
+                ),
+                if (unit.isNotEmpty)
+                  Text(
+                    "per $unit",
+                    style: GoogleFonts.inter(
+                      fontSize: 10,
+                      color: Colors.grey[400],
+                    ),
+                  ),
               ],
             ),
             SizedBox(width: 8),

@@ -37,6 +37,7 @@ migrate_working_dir/
 !.env.example
 backend/node_modules/
 backend/uploads/
+backend/mongo_data/
 *.log
 .gemini/
 

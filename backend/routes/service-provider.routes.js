@@ -5,6 +5,7 @@ const User = require("../models/user.model");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const RefreshToken = require("../models/refresh-token.model");
+const { authLimiter } = require("../middleware/rateLimit");
 const {
   generateRefreshToken,
   generateAccessToken,
@@ -199,38 +200,39 @@ router.post("/", async (req, res) => {
 
     await sp.save();
 
-    const accessToken = generateAccessToken(buildSpPayload(sp));
-    const refreshToken = generateRefreshToken();
-
-    await RefreshToken.create({
-      token: refreshToken,
-      userId: sp._id.toString(),
-      role: "service_provider",
-      userModel: "ServiceProvider",
-      expiresAt: new Date(
-        Date.now() + REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000,
-      ),
-    });
-
+    // Return approval request response - NO TOKENS yet
     res.status(201).json({
       success: true,
-      message: "Service Provider registered successfully",
-      token: accessToken,
-      accessToken: accessToken,
-      refreshToken: refreshToken,
-      user: buildSpResponse(sp),
+      message:
+        "Approval request submitted. Please wait for admin verification.",
+      spId: sp._id,
+      status: "pending",
+      requestedAt: sp.createdAt,
     });
   } catch (err) {
     console.error("Service Provider signup error:", err);
-    res.status(400).json({
+    // Don't expose internal error details - return user-friendly message
+    const errorMsg = err.message || "An error occurred during signup";
+    let statusCode = 500;
+    let userMessage = "An error occurred during signup. Please try again.";
+
+    if (errorMsg.includes("duplicate key")) {
+      userMessage = "This email or phone number is already registered";
+      statusCode = 400;
+    } else if (errorMsg.includes("validation failed")) {
+      userMessage = "Invalid data provided. Please check all fields";
+      statusCode = 400;
+    }
+
+    res.status(statusCode).json({
       success: false,
-      error: err.message,
+      error: userMessage,
     });
   }
 });
 
 // LOGIN SERVICE PROVIDER
-router.post("/login", async (req, res) => {
+router.post("/login", authLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -261,6 +263,30 @@ router.post("/login", async (req, res) => {
         success: false,
         message: "Invalid email or password",
       });
+    }
+
+    // Check if provider is approved
+    if (serviceProvider.status !== "approved") {
+      if (serviceProvider.status === "pending") {
+        return res.status(403).json({
+          success: false,
+          message:
+            "Your account is pending approval. Please wait for admin verification.",
+          status: "pending",
+        });
+      } else if (serviceProvider.status === "rejected") {
+        return res.status(403).json({
+          success: false,
+          message: "Your account has been rejected. Please contact support.",
+          status: "rejected",
+        });
+      } else if (serviceProvider.status === "suspended") {
+        return res.status(403).json({
+          success: false,
+          message: "Your account has been suspended. Please contact support.",
+          status: "suspended",
+        });
+      }
     }
 
     const accessToken = generateAccessToken(buildSpPayload(serviceProvider));
@@ -621,6 +647,41 @@ router.patch("/availability", verifyToken, async (req, res) => {
     res.status(200).json({ success: true, isAvailable: sp.isAvailable });
   } catch (err) {
     res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+// ================================
+// GET /check-approval/:spId - Check Service Provider Approval Status
+// ================================
+router.get("/check-approval/:spId", async (req, res) => {
+  try {
+    const { spId } = req.params;
+
+    const sp =
+      await ServiceProvider.findById(spId).select("status email phone");
+
+    if (!sp) {
+      return res.status(404).json({
+        success: false,
+        message: "Service provider not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      status: sp.status,
+      spId: sp._id,
+      email: sp.email,
+      isApproved: sp.status === "approved",
+      isPending: sp.status === "pending",
+      isRejected: sp.status === "rejected",
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: err.message,
+    });
   }
 });
 

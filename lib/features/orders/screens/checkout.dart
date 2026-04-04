@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:hello/core/services/api_service.dart';
@@ -338,6 +339,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 phoneController,
                 Icons.phone_outlined,
                 keyboardType: TextInputType.phone,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               ),
             ]),
             if (isLaundry) ...[
@@ -661,11 +663,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     IconData icon, {
     int maxLines = 1,
     TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     return TextField(
       controller: ctrl,
       maxLines: maxLines,
       keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
       decoration: InputDecoration(
         prefixIcon: Icon(icon, color: const Color(0xFF1E293B), size: 20),
         hintText: label,
