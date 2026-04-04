@@ -21,17 +21,21 @@ class StripePaymentService {
         return {'success': false, 'message': 'You are not logged in'};
       }
 
-      final response = await http.post(
-        Uri.parse('${ApiService.baseUrl}/api/payments/create-payment-intent'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: json.encode({
-          'bookingId': bookingId,
-          'serviceType': serviceType,
-        }),
-      ).timeout(const Duration(seconds: 30));
+      final response = await http
+          .post(
+            Uri.parse(
+              '${ApiService.baseUrl}/api/payments/create-payment-intent',
+            ),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+            body: json.encode({
+              'bookingId': bookingId,
+              'serviceType': serviceType,
+            }),
+          )
+          .timeout(const Duration(seconds: 30));
 
       final data = json.decode(response.body);
       return data;
@@ -42,17 +46,20 @@ class StripePaymentService {
 
   // ─── Confirm Payment via Backend ───────────────────────────────────────────
   static Future<Map<String, dynamic>> _confirmPaymentWithBackend(
-      String paymentIntentId) async {
+    String paymentIntentId,
+  ) async {
     try {
       final token = await ApiService.getToken();
-      final response = await http.post(
-        Uri.parse('${ApiService.baseUrl}/api/payments/confirm'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: json.encode({'stripePaymentIntentId': paymentIntentId}),
-      ).timeout(const Duration(seconds: 30));
+      final response = await http
+          .post(
+            Uri.parse('${ApiService.baseUrl}/api/payments/confirm'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+            body: json.encode({'stripePaymentIntentId': paymentIntentId}),
+          )
+          .timeout(const Duration(seconds: 30));
 
       return json.decode(response.body);
     } catch (e) {
@@ -78,7 +85,6 @@ class StripePaymentService {
   }) async {
     // Note: Stripe is initialized in main.dart
 
-
     // Step 1: Create PaymentIntent on backend
     final intentResult = await _createPaymentIntent(
       bookingId: bookingId,
@@ -103,14 +109,17 @@ class StripePaymentService {
         paymentSheetParameters: SetupPaymentSheetParameters(
           paymentIntentClientSecret: clientSecret,
           merchantDisplayName: 'IndieLife',
-          style: ThemeMode.light, // Forced Light mode to bypass MIUI Dark Mode unclickable bug
+          style: ThemeMode
+              .light, // Forced Light mode to bypass MIUI Dark Mode unclickable bug
+          allowsDelayedPaymentMethods: false,
+          billingDetailsCollectionLevel: CollectionMode.automatic,
+          defaultBillingDetails: const BillingDetails(
+            address: Address(country: 'PK'),
+          ),
         ),
       );
     } catch (e) {
-      return {
-        'success': false,
-        'message': 'Payment setup failed: $e',
-      };
+      return {'success': false, 'message': 'Payment setup failed: $e'};
     }
 
     // Step 3: Present Payment Sheet
@@ -118,7 +127,11 @@ class StripePaymentService {
       await Stripe.instance.presentPaymentSheet();
     } on StripeException catch (e) {
       if (e.error.code == FailureCode.Canceled) {
-        return {'success': false, 'canceled': true, 'message': 'Payment cancelled'};
+        return {
+          'success': false,
+          'canceled': true,
+          'message': 'Payment cancelled',
+        };
       }
       return {
         'success': false,
