@@ -4,6 +4,7 @@
  */
 
 const rateLimit = require("express-rate-limit");
+const { ipKeyGenerator } = require("express-rate-limit");
 
 // ─── GLOBAL RATE LIMITER (15 requests per 15 minutes) ──────────────────
 const globalLimiter = rateLimit({
@@ -31,7 +32,7 @@ const authLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => req.body.email || req.ip, // Track by email or IP
+  keyGenerator: (req) => req.body.email || ipKeyGenerator(req), // Track by email or IP
   skip: (req) => req.method !== "POST", // Only rate limit POST requests
 });
 
@@ -45,7 +46,7 @@ const otpLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => req.body.email || req.ip, // Track by email
+  keyGenerator: (req) => req.body.email || ipKeyGenerator(req), // Track by email
 });
 
 // ─── PAYMENT RATE LIMITER (20 payment requests per hour) ───────────────
@@ -58,7 +59,7 @@ const paymentLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => req.user?.userId || req.ip, // Track by user ID
+  keyGenerator: (req) => req.user?.userId || ipKeyGenerator(req), // Track by user ID
 });
 
 // ─── SIGNUP RATE LIMITER (3 signups per hour per IP) ───────────────────
@@ -71,7 +72,7 @@ const signupLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => req.ip, // Track by IP
+  keyGenerator: (req) => ipKeyGenerator(req), // Track by IP
 });
 
 module.exports = {

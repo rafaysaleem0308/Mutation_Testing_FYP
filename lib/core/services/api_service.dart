@@ -48,7 +48,8 @@ class ApiResponse {
 class ApiService {
   static String get baseUrl {
     if (Platform.isAndroid) {
-      return "http://192.168.100.89:3000"; // Physical Device IP
+      //return "http://192.168.100.89:3000"; // Physical Device IP
+      return "http://10.0.2:3000"; // Android Emulator (user's machine IP if using physical device)
     }
     return "http://127.0.0.1:3000";
   } // Local development

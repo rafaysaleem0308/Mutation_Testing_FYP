@@ -54,9 +54,11 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SOSService().initialize();
   // Verify Stripe Key exists
-  if (StripeConfig.publishableKey.isEmpty || !StripeConfig.publishableKey.startsWith('pk_')) {
+  if (StripeConfig.publishableKey.isEmpty ||
+      !StripeConfig.publishableKey.startsWith('pk_')) {
     throw Exception(
-        'Stripe Publishable Key is missing or invalid. Please check lib/core/constants/stripe_config.dart');
+      'Stripe Publishable Key is missing or invalid. Please check lib/core/constants/stripe_config.dart',
+    );
   }
 
   Stripe.publishableKey = StripeConfig.publishableKey;
@@ -109,7 +111,8 @@ class MyApp extends StatelessWidget {
         '/notifications': (context) => NotificationsScreen(),
         '/orders': (context) => OrdersScreen(),
         '/chat': (context) {
-          final args = (ModalRoute.of(context)!.settings.arguments
+          final args =
+              (ModalRoute.of(context)!.settings.arguments
                   as Map<String, dynamic>?) ??
               {};
           return ChatScreen(
@@ -164,9 +167,15 @@ class MyApp extends StatelessWidget {
 
       textTheme: GoogleFonts.poppinsTextTheme().copyWith(
         displayLarge: GoogleFonts.poppins(
-            fontSize: 32, fontWeight: FontWeight.bold, color: Colors.black87),
+          fontSize: 32,
+          fontWeight: FontWeight.bold,
+          color: Colors.black87,
+        ),
         displayMedium: GoogleFonts.poppins(
-            fontSize: 28, fontWeight: FontWeight.bold, color: Colors.black87),
+          fontSize: 28,
+          fontWeight: FontWeight.bold,
+          color: Colors.black87,
+        ),
         bodyLarge: GoogleFonts.inter(fontSize: 16, color: Colors.black87),
         bodyMedium: GoogleFonts.inter(fontSize: 14, color: Colors.black87),
       ),
@@ -174,8 +183,10 @@ class MyApp extends StatelessWidget {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: Colors.white,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 16,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide.none,
