@@ -889,6 +889,11 @@ router.post("/", verifyToken, async (req, res) => {
     }
 
     if (serviceType === "Maintenance") {
+      serviceData.expertise = sanitizeString(expertise) || "";
+      serviceData.experience = sanitizeString(experience) || "";
+      serviceData.servicesOffered = Array.isArray(servicesOffered)
+        ? servicesOffered.map((s) => sanitizeString(s)).filter((s) => s.length > 0)
+        : [];
     }
 
     const service = new Service(serviceData);
@@ -1020,7 +1025,17 @@ router.put("/:id", verifyToken, async (req, res) => {
       updateData.address = sanitizeString(updateData.address);
     }
 
-    const updatedService = await Service.findByIdAndUpdate(
+    if (updateData.servicesOffered && Array.isArray(updateData.servicesOffered)) {
+      updateData.servicesOffered = updateData.servicesOffered.map((s) => sanitizeString(s)).filter((s) => s.length > 0);
+    }
+
+    if (updateData.expertise) {
+      updateData.expertise = sanitizeString(updateData.expertise);
+    }
+
+    if (updateData.experience) {
+      updateData.experience = sanitizeString(updateData.experience);
+    }
       id,
       { ...updateData, updatedAt: Date.now() },
       { new: true, runValidators: true },
