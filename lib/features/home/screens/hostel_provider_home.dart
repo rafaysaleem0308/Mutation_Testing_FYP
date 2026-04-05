@@ -78,12 +78,42 @@ class _HostelProviderHomeState extends State<HostelProviderHome>
   Future<void> _loadOrders() async {
     try {
       final ordersResult = await ApiService.getProviderOrders();
+      final housingResult = await ApiService.getOwnerHousingBookings();
       final statsResult = await ApiService.getProviderOrderStats();
+
       if (mounted && ordersResult['success'] == true) {
-        setState(() {
-          _orders = List<Map<String, dynamic>>.from(
-            ordersResult['orders'] ?? [],
+        List<Map<String, dynamic>> allOrders = [];
+
+        // Add service provider orders
+        if (ordersResult['orders'] != null) {
+          allOrders.addAll(
+            List<Map<String, dynamic>>.from(ordersResult['orders']),
           );
+        }
+
+        // Add housing bookings
+        if (housingResult['success'] == true &&
+            housingResult['bookings'] != null) {
+          allOrders.addAll(
+            (housingResult['bookings'] as List).map((b) {
+              return {...b as Map<String, dynamic>, 'isHousingBooking': true};
+            }).toList(),
+          );
+        }
+
+        // Sort by date (most recent first)
+        allOrders.sort((a, b) {
+          final dateA =
+              DateTime.tryParse(a['createdAt']?.toString() ?? '') ??
+              DateTime.now();
+          final dateB =
+              DateTime.tryParse(b['createdAt']?.toString() ?? '') ??
+              DateTime.now();
+          return dateB.compareTo(dateA);
+        });
+
+        setState(() {
+          _orders = allOrders;
           _stats = Map<String, dynamic>.from(statsResult['stats'] ?? {});
         });
       }
@@ -201,7 +231,7 @@ class _HostelProviderHomeState extends State<HostelProviderHome>
         .toList();
     final active = _orders
         .where((o) => ['Confirmed', 'Visit Scheduled'].contains(o['status']))
-        .toList(); // Scheduled visits
+        .toList();
     final history = _orders
         .where(
           (o) => ['Completed', 'Cancelled', 'Rejected'].contains(o['status']),
@@ -478,19 +508,6 @@ class _HostelProviderHomeState extends State<HostelProviderHome>
     );
   }
 
-  Widget _buildOrders() => Scaffold(
-    backgroundColor: Colors.transparent,
-    appBar: AppBar(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      title: Text(
-        "All Orders",
-        style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
-      ),
-    ),
-    body: _buildOrderList(_orders),
-  );
-
   Widget _buildWelcomeHeader() {
     bool isVerified = userData?['isVerified'] ?? false;
     return Container(
@@ -619,11 +636,28 @@ class _HostelProviderHomeState extends State<HostelProviderHome>
     bool isRequest = false,
     bool isActive = false,
   }) {
+    final isHousing = o['isHousingBooking'] == true;
+
     Color sCol = (o['status'] == 'Completed')
         ? Colors.green
         : (o['status'] == 'Pending' ? Colors.orange : Colors.purple);
     String displayStatus = o['status'] ?? 'Pending';
-    String customerPhone = o['customerId']?['phone'] ?? (o['phone'] ?? '');
+
+    String bookingId = isHousing
+        ? (o['bookingNumber'] ?? o['_id']?.toString().substring(0, 8))
+        : (o['orderNumber'] ?? o['_id']?.toString().substring(0, 8));
+
+    String guestName = isHousing
+        ? (o['tenantName'] ?? 'Tenant')
+        : (o['customerName'] ?? 'Guest');
+
+    String contactInfo = isHousing
+        ? (o['tenantPhone'] ?? o['tenantEmail'] ?? 'N/A')
+        : (o['customerId']?['phone'] ?? (o['phone'] ?? ''));
+
+    String address = isHousing
+        ? (o['propertyTitle'] ?? o['address'] ?? 'N/A')
+        : (o['deliveryAddress'] ?? 'N/A');
 
     return Container(
       margin: EdgeInsets.only(bottom: 16),
@@ -650,7 +684,11 @@ class _HostelProviderHomeState extends State<HostelProviderHome>
                   color: sCol.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.key_rounded, color: sCol, size: 20),
+                child: Icon(
+                  isHousing ? Icons.home_rounded : Icons.key_rounded,
+                  color: sCol,
+                  size: 20,
+                ),
               ),
               SizedBox(width: 12),
               Expanded(
@@ -658,7 +696,9 @@ class _HostelProviderHomeState extends State<HostelProviderHome>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Booking #${o['orderNumber']?.toString().substring(0, 8) ?? o['_id']?.toString().substring(0, 6).toUpperCase()}",
+                      isHousing
+                          ? "Booking #${bookingId}"
+                          : "Order #${bookingId}",
                       style: GoogleFonts.poppins(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
@@ -676,7 +716,7 @@ class _HostelProviderHomeState extends State<HostelProviderHome>
                   ],
                 ),
               ),
-              if (o['customerId'] != null)
+              if (!isHousing && o['customerId'] != null)
                 IconButton(
                   icon: Icon(
                     Icons.chat_bubble_outline_rounded,
@@ -689,7 +729,7 @@ class _HostelProviderHomeState extends State<HostelProviderHome>
                     arguments: {
                       'receiverId': o['customerId']['_id'] ?? o['customerId'],
                       'otherUserName': o['customerName'] ?? 'Customer',
-                      'serviceName': 'Hostel Inquiry',
+                      'serviceName': 'Service Order',
                       'serviceId':
                           (o['items'] != null &&
                               (o['items'] as List).isNotEmpty)
@@ -720,66 +760,84 @@ class _HostelProviderHomeState extends State<HostelProviderHome>
 
           _detailRow(
             Icons.person_outline,
-            "Guest",
-            "${o['customerName'] ?? 'Guest'}",
+            isHousing ? "Tenant" : "Guest",
+            guestName,
           ),
-          if (o['deliveryAddress'] != null)
+          if (contactInfo.isNotEmpty)
+            _detailRow(Icons.phone_outlined, "Contact", contactInfo),
+          _detailRow(
+            Icons.location_on_outlined,
+            isHousing ? "Property" : "Address",
+            address,
+          ),
+
+          if (isHousing && o['monthlyRent'] != null) ...[
+            Divider(height: 24, thickness: 0.5),
             _detailRow(
-              Icons.location_on_outlined,
-              "Address/Contact",
-              "${o['deliveryAddress']}",
+              Icons.money_outlined,
+              "Monthly Rent",
+              "PKR ${o['monthlyRent']}",
             ),
+            if (o['moveInDate'] != null)
+              _detailRow(
+                Icons.calendar_today_outlined,
+                "Move-in Date",
+                o['moveInDate'].toString().substring(0, 10),
+              ),
+          ],
 
-          Divider(height: 24, thickness: 0.5),
-
-          Text(
-            "Room / Agreement",
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey,
+          if (!isHousing && (o['items'] as List? ?? []).isNotEmpty) ...[
+            Divider(height: 24, thickness: 0.5),
+            Text(
+              "Room / Agreement",
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey,
+              ),
             ),
-          ),
-          SizedBox(height: 8),
+            SizedBox(height: 8),
 
-          ...(o['items'] as List? ?? []).map((item) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
-              child: Row(
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: Colors.purple.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      "1x",
-                      style: GoogleFonts.poppins(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                        color: Colors.purple,
+            // ✅ FIX: Corrected trailing semicolon → comma inside Padding's child arg
+            ...(o['items'] as List).map((item) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.purple.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        "1x",
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          color: Colors.purple,
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      item['serviceName'] ?? 'Item',
-                      style: GoogleFonts.inter(fontSize: 13),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        item['serviceName'] ?? 'Item',
+                        style: GoogleFonts.inter(fontSize: 13),
+                      ),
                     ),
-                  ),
-                  Text(
-                    "PKR ${item['totalPrice'] ?? 0}",
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
+                    Text(
+                      "PKR ${item['totalPrice'] ?? 0}",
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          }),
+                  ],
+                ),
+              );
+            }),
+          ],
 
           if (isRequest || isActive) SizedBox(height: 16),
 
@@ -809,7 +867,7 @@ class _HostelProviderHomeState extends State<HostelProviderHome>
                       backgroundColor: Colors.green,
                       foregroundColor: Colors.white,
                     ),
-                    child: Text("Accept Visit"),
+                    child: Text(isHousing ? "Accept Booking" : "Accept Visit"),
                   ),
                 ),
               ],
@@ -820,7 +878,7 @@ class _HostelProviderHomeState extends State<HostelProviderHome>
               color: Colors.grey[100],
               margin: EdgeInsets.only(bottom: 16),
             ),
-            if (o['status'] == 'Confirmed')
+            if (o['status'] == 'Confirmed' && !isHousing)
               ElevatedButton(
                 onPressed: () => _updateStatus(o['_id'], 'Visit Scheduled'),
                 style: ElevatedButton.styleFrom(
@@ -830,7 +888,7 @@ class _HostelProviderHomeState extends State<HostelProviderHome>
                 ),
                 child: Text("Confirm Visit Time"),
               ),
-            if (o['status'] == 'Visit Scheduled')
+            if (o['status'] == 'Visit Scheduled' && !isHousing)
               ElevatedButton(
                 onPressed: () => _updateStatus(o['_id'], 'Completed'),
                 style: ElevatedButton.styleFrom(
@@ -839,6 +897,17 @@ class _HostelProviderHomeState extends State<HostelProviderHome>
                   minimumSize: Size(double.infinity, 45),
                 ),
                 child: Text("Mark Visit Complete / Booked"),
+              ),
+            if (o['status'] == 'Confirmed' && isHousing)
+              ElevatedButton(
+                onPressed: () =>
+                    _updateStatus(o['_id'], 'Completed', isHousing: true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  minimumSize: Size(double.infinity, 45),
+                ),
+                child: Text("Mark Booking Complete"),
               ),
           ],
         ],
@@ -878,9 +947,17 @@ class _HostelProviderHomeState extends State<HostelProviderHome>
     );
   }
 
-  Future<void> _updateStatus(String orderId, String status) async {
+  Future<void> _updateStatus(
+    String orderId,
+    String status, {
+    bool isHousing = false,
+  }) async {
     setState(() => _isLoading = true);
-    final result = await ApiService.updateOrderStatus(orderId, status, null);
+
+    final result = isHousing
+        ? await ApiService.updateHousingBookingStatus(orderId, status)
+        : await ApiService.updateOrderStatus(orderId, status, null);
+
     if (!mounted) return;
     if (result['success'] == true) {
       await _loadOrders();
@@ -1189,13 +1266,14 @@ class _HostelProviderHomeState extends State<HostelProviderHome>
     }
   }
 
+  // ✅ FIX: Replaced withValues(alpha:) → withOpacity() for SDK compatibility
   Widget _buildProfile() => Center(
     child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         CircleAvatar(
           radius: 50,
-          backgroundColor: Color(0xFF7b4397).withValues(alpha: 0.1),
+          backgroundColor: Color(0xFF7b4397).withOpacity(0.1),
           child: Icon(Icons.person, size: 50, color: Color(0xFF7b4397)),
         ),
         SizedBox(height: 24),
@@ -1226,12 +1304,13 @@ class _HostelProviderHomeState extends State<HostelProviderHome>
     ),
   );
 
+  // ✅ FIX: Replaced withValues(alpha:) → withOpacity() for SDK compatibility
   Widget _buildBottomNav() {
     return Container(
       margin: EdgeInsets.all(24),
       padding: EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.9),
+        color: Colors.black.withOpacity(0.9),
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(

@@ -23,14 +23,36 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
   Future<void> _loadOrders() async {
     setState(() => _isLoading = true);
-    final result = await ApiService.getCustomerOrders();
+
+    // Fetch service orders
+    final orderResult = await ApiService.getCustomerOrders();
+
+    // Fetch housing bookings
+    final housingResult = await ApiService.getCustomerHousingBookings();
+
     if (mounted) {
       setState(() {
-        if (result['success'] == true) {
-          _orders = result['orders'] ?? [];
-          // Sort by date descending
-          _orders.sort((a, b) => (b['createdAt'] ?? '').compareTo(a['createdAt'] ?? ''));
+        List<dynamic> allOrders = [];
+
+        if (orderResult['success'] == true && orderResult['orders'] != null) {
+          allOrders.addAll(
+            (orderResult['orders'] as List).map((o) {
+              return {...o, 'bookingType': 'service'};
+            }),
+          );
         }
+
+        if (housingResult['success'] == true &&
+            housingResult['bookings'] != null) {
+          allOrders.addAll(housingResult['bookings'] as List);
+        }
+
+        // Sort by date descending
+        allOrders.sort(
+          (a, b) => (b['createdAt'] ?? '').compareTo(a['createdAt'] ?? ''),
+        );
+
+        _orders = allOrders;
         _isLoading = false;
       });
     }
@@ -41,7 +63,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
     return Scaffold(
       backgroundColor: Color(0xFFF5F7FA),
       appBar: AppBar(
-        title: Text("Order History", style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
+        title: Text(
+          "Order History",
+          style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
         iconTheme: IconThemeData(color: Colors.black),
@@ -49,16 +74,17 @@ class _OrdersScreenState extends State<OrdersScreen> {
       body: _isLoading
           ? Center(child: CircularProgressIndicator(color: Colors.black))
           : _orders.isEmpty
-              ? _buildEmptyOrders()
-              : RefreshIndicator(
-                  onRefresh: _loadOrders,
-                  color: Colors.black,
-                  child: ListView.builder(
-                    padding: EdgeInsets.all(20),
-                    itemCount: _orders.length,
-                    itemBuilder: (context, index) => _buildOrderCard(_orders[index]),
-                  ),
-                ),
+          ? _buildEmptyOrders()
+          : RefreshIndicator(
+              onRefresh: _loadOrders,
+              color: Colors.black,
+              child: ListView.builder(
+                padding: EdgeInsets.all(20),
+                itemCount: _orders.length,
+                itemBuilder: (context, index) =>
+                    _buildOrderCard(_orders[index]),
+              ),
+            ),
     );
   }
 
@@ -69,20 +95,40 @@ class _OrdersScreenState extends State<OrdersScreen> {
         children: [
           Icon(Icons.history, size: 80, color: Colors.grey[300]),
           SizedBox(height: 16),
-          Text("No orders yet", style: GoogleFonts.poppins(fontSize: 18, color: Colors.grey[600])),
+          Text(
+            "No orders yet",
+            style: GoogleFonts.poppins(fontSize: 18, color: Colors.grey[600]),
+          ),
           SizedBox(height: 8),
-          Text("Start ordering some delicious meals or laundry services!", style: GoogleFonts.inter(color: Colors.grey[500]), textAlign: TextAlign.center),
+          Text(
+            "Start ordering some delicious meals or laundry services!",
+            style: GoogleFonts.inter(color: Colors.grey[500]),
+            textAlign: TextAlign.center,
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildOrderCard(Map<String, dynamic> order) {
+  Widget _buildOrderCard(dynamic order) {
     final status = order['status'] ?? 'Pending';
-    final date = order['createdAt'] != null ? DateTime.parse(order['createdAt']) : DateTime.now();
-    final total = double.tryParse(order['totalAmount']?.toString() ?? '0') ?? 0.0;
+    final date = order['createdAt'] != null
+        ? DateTime.parse(order['createdAt'])
+        : DateTime.now();
+    final total =
+        double.tryParse(order['totalAmount']?.toString() ?? '0') ?? 0.0;
     final orderId = order['_id']?.toString() ?? 'ID';
-    final providerName = order['providerName'] ?? order['serviceProviderName'] ?? 'Provider';
+    final isHousing = order['bookingType'] == 'housing';
+
+    // For housing bookings
+    final propertyTitle = isHousing
+        ? (order['propertyTitle'] ?? 'Housing Booking')
+        : null;
+    final providerName = isHousing
+        ? (order['ownerName'] ?? 'Owner')
+        : (order['providerName'] ?? order['serviceProviderName'] ?? 'Provider');
+    final itemCount = isHousing ? 1 : ((order['items'] as List?)?.length ?? 0);
+    final displayName = isHousing ? propertyTitle : providerName;
 
     return GestureDetector(
       onTap: () => _showOrderDetails(order),
@@ -92,7 +138,13 @@ class _OrdersScreenState extends State<OrdersScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: Offset(0, 4))],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 10,
+              offset: Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           children: [
@@ -102,9 +154,33 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Order #${orderId.substring(orderId.length > 8 ? orderId.length - 8 : 0)}", style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.grey[600])),
+                    Row(
+                      children: [
+                        Text(
+                          isHousing ? "🏠" : "🛒",
+                          style: TextStyle(fontSize: 14),
+                        ),
+                        SizedBox(width: 6),
+                        Text(
+                          isHousing
+                              ? "Booking #${orderId.substring(orderId.length > 8 ? orderId.length - 8 : 0)}"
+                              : "Order #${orderId.substring(orderId.length > 8 ? orderId.length - 8 : 0)}",
+                          style: GoogleFonts.inter(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
                     SizedBox(height: 4),
-                    Text(providerName, style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16)),
+                    Text(
+                      displayName ?? providerName,
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
                   ],
                 ),
                 _statusBadge(status),
@@ -117,12 +193,40 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(DateFormat('MMM dd, yyyy • hh:mm a').format(date), style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[600])),
+                    Text(
+                      DateFormat('MMM dd, yyyy • hh:mm a').format(date),
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                      ),
+                    ),
                     SizedBox(height: 4),
-                    Text("${(order['items'] as List).length} items", style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[600])),
+                    if (isHousing)
+                      Text(
+                        order['duration'] ?? '1 Month',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
+                      )
+                    else
+                      Text(
+                        "$itemCount items",
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
+                      ),
                   ],
                 ),
-                Text("PKR ${total.toStringAsFixed(0)}", style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 18, color: Color(0xFFFF512F))),
+                Text(
+                  "PKR ${total.toStringAsFixed(0)}",
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    color: Color(0xFFFF512F),
+                  ),
+                ),
               ],
             ),
           ],
@@ -134,26 +238,46 @@ class _OrdersScreenState extends State<OrdersScreen> {
   Widget _statusBadge(String status) {
     Color color;
     switch (status.toLowerCase()) {
-      case 'completed': color = Colors.green; break;
-      case 'cancelled': color = Colors.red; break;
-      case 'accepted': color = Colors.blue; break;
-      case 'pending': color = Colors.orange; break;
-      default: color = Colors.grey;
+      case 'completed':
+        color = Colors.green;
+        break;
+      case 'cancelled':
+        color = Colors.red;
+        break;
+      case 'accepted':
+        color = Colors.blue;
+        break;
+      case 'pending':
+        color = Colors.orange;
+        break;
+      default:
+        color = Colors.grey;
     }
 
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
-      child: Text(status.toUpperCase(), style: GoogleFonts.inter(color: color, fontSize: 10, fontWeight: FontWeight.bold)),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        status.toUpperCase(),
+        style: GoogleFonts.inter(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
     );
   }
 
   void _showOrderDetails(Map<String, dynamic> order) {
-     showModalBottomSheet(
+    showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => OrderDetailsModal(order: order),
+      builder: (context) =>
+          OrderDetailsModal(order: Map<String, dynamic>.from(order as Map)),
     );
   }
 }

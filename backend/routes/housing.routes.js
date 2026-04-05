@@ -124,12 +124,10 @@ router.post("/booking", verifyToken, async (req, res) => {
 
     const { propertyId, moveInDate, duration, paymentMethod, notes } = req.body;
     if (!propertyId || !moveInDate) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Property and move-in date are required",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Property and move-in date are required",
+      });
     }
 
     // ─── VALIDATE MOVE-IN DATE ────────────────────────────────────────
@@ -294,6 +292,7 @@ router.get("/booking/my-bookings", verifyToken, async (req, res) => {
         "propertyId",
         "title images thumbnailImage city address monthlyRent propertyType",
       )
+      .populate("ownerId", "firstName lastName email phone city")
       .sort({ createdAt: -1 })
       .lean();
     res.json({ success: true, bookings, total: bookings.length });
@@ -336,12 +335,10 @@ router.patch("/booking/:id/status", verifyToken, async (req, res) => {
       "Cancelled",
     ];
     if (!validStatuses.includes(status)) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: `Invalid status. Must be one of: ${validStatuses.join(", ")}`,
-        });
+      return res.status(400).json({
+        success: false,
+        message: `Invalid status. Must be one of: ${validStatuses.join(", ")}`,
+      });
     }
 
     const booking = await HousingBooking.findById(req.params.id);
@@ -417,12 +414,10 @@ router.post("/visit", verifyToken, async (req, res) => {
 
     const { propertyId, visitDate, visitTime, message } = req.body;
     if (!propertyId || !visitDate || !visitTime) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Property, date, and time are required",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Property, date, and time are required",
+      });
     }
 
     let property = await HousingProperty.findById(propertyId).populate(
@@ -831,12 +826,10 @@ router.post("/", verifyToken, async (req, res) => {
   try {
     const spId = req.user.spId || req.user.userId;
     if (!spId) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Service provider ID not found in token",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Service provider ID not found in token",
+      });
     }
 
     const sp = await ServiceProvider.findById(spId);
@@ -847,12 +840,10 @@ router.post("/", verifyToken, async (req, res) => {
     }
 
     if (sp.spSubRole !== "Hostel/Flat Accommodation") {
-      return res
-        .status(403)
-        .json({
-          success: false,
-          message: "Only housing providers can create properties",
-        });
+      return res.status(403).json({
+        success: false,
+        message: "Only housing providers can create properties",
+      });
     }
 
     const {

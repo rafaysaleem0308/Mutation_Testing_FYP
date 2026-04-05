@@ -211,6 +211,83 @@ router.get("/laundry-provider/:providerId", async (req, res) => {
   }
 });
 
+// GET /api/services/housing-provider/:providerId
+router.get("/housing-provider/:providerId", async (req, res) => {
+  try {
+    const { providerId } = req.params;
+    const provider = await ServiceProvider.findById(providerId);
+    if (!provider) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Provider not found" });
+    }
+
+    const services = await Service.find({
+      serviceProviderId: providerId,
+      serviceType: "Hostel/Flat Accommodation",
+      status: "Active",
+    })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    let averageRating = 0;
+    if (services.length > 0) {
+      const totalRating = services.reduce((sum, s) => sum + (s.rating || 0), 0);
+      averageRating = parseFloat((totalRating / services.length).toFixed(1));
+    }
+
+    const providerData = {
+      _id: provider._id,
+      userId: provider._id,
+      username: `${provider.firstName} ${provider.lastName}`,
+      email: provider.email,
+      phone: provider.phone,
+      city: provider.city,
+      address: provider.address,
+      districtName: provider.districtName,
+      districtNazim: provider.districtNazim,
+      rating: averageRating,
+      servicesCount: services.length,
+      isVerified: provider.isVerified,
+      profileImage: provider.profileImage,
+    };
+
+    const servicesData = services.map((service) => ({
+      _id: service._id,
+      name: service.serviceName,
+      description: service.description,
+      rating: service.rating,
+      price: service.price,
+      unit: service.unit,
+      imagePath: service.imageUrl || "assets/images/default_housing.png",
+      accommodationType: service.accommodationType,
+      bedrooms: service.bedrooms,
+      bathrooms: service.bathrooms,
+      furniture: service.furniture,
+      amenities: service.amenities || [],
+      availableDays: service.availableDays || [],
+      availableTimeSlots: service.availableTimeSlots || [],
+      status: service.status,
+      featured: service.featured || false,
+      discountPercentage: service.discountPercentage || 0,
+      tags: service.tags || [],
+      createdAt: service.createdAt,
+    }));
+
+    res.status(200).json({
+      success: true,
+      provider: providerData,
+      services: servicesData,
+      totalServices: servicesData.length,
+    });
+  } catch (error) {
+    console.error("Get housing provider detail error:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Server error", error: error.message });
+  }
+});
+
 // GET /api/services/meal-providers
 router.get("/meal-providers", async (req, res) => {
   try {
@@ -527,6 +604,50 @@ router.get("/search", async (req, res) => {
     res.status(200).json({ success: true, services, total: services.length });
   } catch (error) {
     console.error("Search services error:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Server error", error: error.message });
+  }
+});
+
+// GET /api/services/recommendations/featured - Get featured/recommended services
+router.get("/recommendations/featured", async (req, res) => {
+  try {
+    const { limit = 10, type } = req.query;
+    let query = { status: "Active", featured: true };
+
+    if (type) query.serviceType = type;
+
+    const services = await Service.find(query)
+      .sort({ rating: -1, createdAt: -1 })
+      .limit(parseInt(limit))
+      .lean();
+
+    res.status(200).json({ success: true, services, total: services.length });
+  } catch (error) {
+    console.error("Get featured services error:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Server error", error: error.message });
+  }
+});
+
+// GET /api/services/recommendations/top-rated - Get top rated services
+router.get("/recommendations/top-rated", async (req, res) => {
+  try {
+    const { limit = 8, type } = req.query;
+    let query = { status: "Active", rating: { $gte: 3.5 } };
+
+    if (type) query.serviceType = type;
+
+    const services = await Service.find(query)
+      .sort({ rating: -1, totalReviews: -1, createdAt: -1 })
+      .limit(parseInt(limit))
+      .lean();
+
+    res.status(200).json({ success: true, services, total: services.length });
+  } catch (error) {
+    console.error("Get top rated services error:", error);
     res
       .status(500)
       .json({ success: false, message: "Server error", error: error.message });

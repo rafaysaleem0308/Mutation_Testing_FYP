@@ -831,6 +831,116 @@ class ApiService {
     }
   }
 
+  // --------------------- GET FEATURED SERVICES (RECOMMENDATIONS) ---------------------
+  static Future<List<Map<String, dynamic>>> getFeaturedServices({
+    int limit = 10,
+  }) async {
+    try {
+      final response = await http.get(
+        Uri.parse(
+          '$baseUrl/api/services/recommendations/featured?limit=$limit',
+        ),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        return List<Map<String, dynamic>>.from(responseData['services'] ?? []);
+      } else {
+        throw Exception('Failed to load featured services');
+      }
+    } catch (error) {
+      print("Get featured services error: $error");
+      return [];
+    }
+  }
+
+  // --------------------- GET TOP RATED SERVICES ---------------------
+  static Future<List<Map<String, dynamic>>> getTopRatedServices({
+    int limit = 8,
+  }) async {
+    try {
+      final response = await http.get(
+        Uri.parse(
+          '$baseUrl/api/services/recommendations/top-rated?limit=$limit',
+        ),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        return List<Map<String, dynamic>>.from(responseData['services'] ?? []);
+      } else {
+        throw Exception('Failed to load top rated services');
+      }
+    } catch (error) {
+      print("Get top rated services error: $error");
+      return [];
+    }
+  }
+
+  // --------------------- GET PERSONALIZED RECOMMENDATIONS ---------------------
+  static Future<List<Map<String, dynamic>>> getPersonalizedRecommendations({
+    int limit = 10,
+  }) async {
+    try {
+      final token = await getToken();
+      if (token == null) throw Exception('Not logged in');
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/recommendations/personalized?limit=$limit'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        return List<Map<String, dynamic>>.from(
+          responseData['recommendations'] ?? [],
+        );
+      } else {
+        throw Exception('Failed to load personalized recommendations');
+      }
+    } catch (error) {
+      print("Get personalized recommendations error: $error");
+      return [];
+    }
+  }
+
+  // --------------------- TRACK USER INTERACTION ---------------------
+  static Future<bool> trackInteraction({
+    required String interactionType,
+    String? serviceId,
+    String? serviceType,
+    Map<String, dynamic>? metadata,
+  }) async {
+    try {
+      final token = await getToken();
+      if (token == null) return false;
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/recommendations/track'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: json.encode({
+          'interactionType': interactionType,
+          'serviceId': serviceId,
+          'serviceType': serviceType,
+          'metadata': metadata,
+        }),
+      );
+
+      return response.statusCode == 201;
+    } catch (error) {
+      print("Track interaction error: $error");
+      return false;
+    }
+  }
+
   // ================================
   // FORGOT PASSWORD
   // ================================
@@ -1709,6 +1819,61 @@ class ApiService {
       }
     } catch (error) {
       print("Get customer orders error: $error");
+      return {
+        'success': false,
+        'message': 'Network error: Please check your connection',
+      };
+    }
+  }
+
+  // GET CUSTOMER HOUSING BOOKINGS
+  static Future<Map<String, dynamic>> getCustomerHousingBookings() async {
+    try {
+      final token = await getToken();
+      if (token == null) {
+        return {'success': false, 'message': 'User not logged in'};
+      }
+
+      final uri = Uri.parse('$baseUrl/api/housing/booking/my-bookings');
+
+      final response = await http.get(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      print("Get customer housing bookings status: ${response.statusCode}");
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        // Format housing bookings to match order structure
+        final bookings =
+            (responseData['bookings'] as List?)?.map((b) {
+              return {
+                ...b,
+                'bookingType': 'housing',
+                'orderNumber': b['bookingNumber'] ?? 'N/A',
+                'createdAt': b['createdAt'] ?? DateTime.now().toIso8601String(),
+              };
+            }).toList() ??
+            [];
+
+        return {
+          'success': true,
+          'bookings': bookings,
+          'total': responseData['total'] ?? 0,
+        };
+      } else {
+        final errorData = json.decode(response.body);
+        return {
+          'success': false,
+          'message': errorData['message'] ?? 'Failed to fetch housing bookings',
+        };
+      }
+    } catch (error) {
+      print("Get customer housing bookings error: $error");
       return {
         'success': false,
         'message': 'Network error: Please check your connection',
@@ -3107,7 +3272,7 @@ class ApiService {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: json.encode({'status': status, 'notes': ?notes}),
+        body: json.encode({'status': status, 'notes': notes}),
       );
       return json.decode(response.body);
     } catch (e) {
@@ -3531,6 +3696,182 @@ class ApiService {
       return json.decode(response.body);
     } catch (e) {
       return {'success': false, 'message': 'Network error: $e'};
+    }
+  }
+
+  // ================================
+  // COMMUNITY FUNCTIONS
+  // ================================
+
+  /// Get community posts with pagination and filtering
+  static Future<Map<String, dynamic>> getCommunityPosts({
+    int page = 1,
+    int limit = 20,
+    String? category,
+  }) async {
+    try {
+      final params = <String, String>{
+        'page': page.toString(),
+        'limit': limit.toString(),
+      };
+      if (category != null && category.isNotEmpty && category != 'All') {
+        params['category'] = category;
+      }
+
+      final uri = Uri.parse(
+        '$baseUrl/api/community/posts',
+      ).replace(queryParameters: params);
+
+      print('Fetching community posts from: ${uri.toString()}');
+
+      final response = await http.get(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      print('Community posts status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        return {
+          'success': true,
+          'posts': responseData['posts'] ?? [],
+          'total': responseData['total'] ?? 0,
+          'page': responseData['page'] ?? page,
+          'totalPages': responseData['totalPages'] ?? 1,
+          'hasMore': responseData['hasMore'] ?? false,
+        };
+      } else {
+        return {
+          'success': false,
+          'message': 'Failed to load community posts',
+          'posts': [],
+        };
+      }
+    } catch (error) {
+      print('Get community posts error: $error');
+      return {
+        'success': false,
+        'message': 'Network error: $error',
+        'posts': [],
+      };
+    }
+  }
+
+  /// Create a new community post
+  static Future<Map<String, dynamic>> createCommunityPost(
+    Map<String, dynamic> postData,
+  ) async {
+    try {
+      final token = await getToken();
+      if (token == null) {
+        return {'success': false, 'message': 'User not logged in'};
+      }
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/community/posts'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: json.encode(postData),
+      );
+
+      print('Create post status: ${response.statusCode}');
+      final responseData = json.decode(response.body);
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return {
+          'success': true,
+          'message': responseData['message'] ?? 'Post created successfully',
+          'post': responseData['post'],
+        };
+      } else {
+        return {
+          'success': false,
+          'message': responseData['message'] ?? 'Failed to create post',
+        };
+      }
+    } catch (error) {
+      print('Create post error: $error');
+      return {'success': false, 'message': 'Network error: $error'};
+    }
+  }
+
+  /// Like/Unlike a community post
+  static Future<Map<String, dynamic>> toggleLikePost(String postId) async {
+    try {
+      final token = await getToken();
+      if (token == null) {
+        return {'success': false, 'message': 'User not logged in'};
+      }
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/community/posts/$postId/like'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      final responseData = json.decode(response.body);
+
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'liked': responseData['liked'] ?? false,
+          'likeCount': responseData['likeCount'] ?? 0,
+        };
+      } else {
+        return {
+          'success': false,
+          'message': responseData['message'] ?? 'Failed to like post',
+        };
+      }
+    } catch (error) {
+      print('Toggle like post error: $error');
+      return {'success': false, 'message': 'Network error: $error'};
+    }
+  }
+
+  /// Add comment to community post
+  static Future<Map<String, dynamic>> addCommentToPost(
+    String postId,
+    String comment,
+  ) async {
+    try {
+      final token = await getToken();
+      if (token == null) {
+        return {'success': false, 'message': 'User not logged in'};
+      }
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/community/posts/$postId/comments'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: json.encode({'comment': comment}),
+      );
+
+      final responseData = json.decode(response.body);
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return {
+          'success': true,
+          'message': 'Comment added successfully',
+          'comment': responseData['comment'],
+          'commentCount': responseData['commentCount'] ?? 0,
+        };
+      } else {
+        return {
+          'success': false,
+          'message': responseData['message'] ?? 'Failed to add comment',
+        };
+      }
+    } catch (error) {
+      print('Add comment error: $error');
+      return {'success': false, 'message': 'Network error: $error'};
     }
   }
 }

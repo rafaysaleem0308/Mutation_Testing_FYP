@@ -3,6 +3,8 @@ const router = express.Router();
 const User = require("../models/user.model");
 const ServiceProvider = require("../models/service-provider.model");
 const Order = require("../models/order.model");
+const HousingBooking = require("../models/housing-booking.model");
+const HousingProperty = require("../models/housing-property.model");
 const Message = require("../models/message.model");
 const Chat = require("../models/chat.model");
 const Settings = require("../models/settings.model");
@@ -426,13 +428,82 @@ router.delete(
 // ─── BOOKING MANAGEMENT ───────────────────────────────────────────────────────
 router.get("/bookings", verifyToken, requireRole("admin"), async (req, res) => {
   try {
-    const { status, serviceType } = req.query;
-    const query = {};
-    if (status) query.status = status;
-    if (serviceType) query["items.serviceType"] = serviceType;
-    const bookings = await Order.find(query).sort({ createdAt: -1 });
+    const { status, serviceType, type } = req.query; // type: "service", "housing", or undefined for all
+
+    let bookings = [];
+
+    // Fetch service/order bookings
+    if (!type || type === "service") {
+      const orderQuery = {};
+      if (status) orderQuery.status = status;
+      if (serviceType) orderQuery["items.serviceType"] = serviceType;
+
+      const orders = await Order.find(orderQuery)
+        .populate("customerId", "firstName lastName email phone")
+        .populate("serviceProviderSpId", "firstName lastName email phone")
+        .sort({ createdAt: -1 })
+        .lean();
+
+      // Add bookingType to distinguish from housing
+      const formattedOrders = orders.map((o) => ({
+        ...o,
+        bookingType: "service",
+        displayName: o.name || `${o.firstName} ${o.lastName}`,
+        displayProvider: o.providerName,
+      }));
+
+      bookings.push(...formattedOrders);
+    }
+
+    // Fetch housing bookings
+    if (!type || type === "housing") {
+      try {
+        const housingQuery = {};
+        if (status) housingQuery.status = status;
+
+        const housingBookings = await HousingBooking.find(housingQuery)
+          .populate("tenantId", "firstName lastName email phone")
+          .populate("ownerId", "firstName lastName email phone")
+          .populate("propertyId", "title city address")
+          .sort({ createdAt: -1 })
+          .lean();
+
+        // Format housing bookings to match Order structure for admin display
+        const formattedHousing = housingBookings.map((h) => ({
+          ...h,
+          bookingType: "housing",
+          orderNumber: h.bookingNumber,
+          displayName:
+            h.tenantName ||
+            (h.tenantId
+              ? `${h.tenantId.firstName} ${h.tenantId.lastName}`
+              : "N/A"),
+          displayProvider: h.ownerName,
+          items: [
+            {
+              serviceName: `Housing Booking - ${h.propertyTitle}`,
+              serviceType: h.propertyType,
+              unitPrice: h.monthlyRent,
+              totalPrice: h.totalAmount,
+            },
+          ],
+          deliveryAddress: h.propertyAddress,
+        }));
+
+        bookings.push(...formattedHousing);
+      } catch (hErr) {
+        console.error("[ERROR] Housing booking fetch error:", hErr);
+      }
+    }
+
+    // Sort all by date
+    bookings = bookings.sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+    );
+
     res.status(200).json({ success: true, bookings });
   } catch (error) {
+    console.error("Error fetching bookings:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 });
@@ -601,18 +672,21 @@ router.post(
 
       // Build the target query
       let targetUsers = [];
+
       if (target === "all") {
-        targetUsers = await User.find({
-          role: { $in: ["user", "service_provider"] },
-        })
-          .select("_id")
-          .lean();
+        // Get all regular users
+        const users = await User.find({ role: "user" }).select("_id").lean();
+
+        // Get all service providers (from ServiceProvider model)
+        const providers = await ServiceProvider.find().select("_id").lean();
+
+        targetUsers = [...users, ...providers.map((p) => ({ _id: p._id }))];
       } else if (target === "users") {
         targetUsers = await User.find({ role: "user" }).select("_id").lean();
       } else if (target === "providers") {
-        targetUsers = await User.find({ role: "service_provider" })
-          .select("_id")
-          .lean();
+        // Get service providers from ServiceProvider model
+        const providers = await ServiceProvider.find().select("_id").lean();
+        targetUsers = providers.map((p) => ({ _id: p._id }));
       } else if (target === "specific" && specificId) {
         targetUsers = [{ _id: specificId }];
       }
@@ -621,40 +695,66 @@ router.post(
       const io = req.app.get("io");
       const Notification = require("../models/notification.model");
 
-      const notificationPromises = targetUsers.map(async (u) => {
-        const notif = await Notification.create({
-          userId: u._id,
-          title,
-          body: message,
-          type: "admin_broadcast",
-          icon: "campaign",
-        });
+      console.log(
+        `Creating notifications for ${targetUsers.length} recipients (target: ${target})`,
+      );
 
-        if (io) {
-          // Must perfectly match the Flutter app's socket listener logic
-          io.to(u._id.toString()).emit("new_notification", notif);
-          // Maintain legacy emit just in case
-          io.to(u._id.toString()).emit("notification", {
+      const notificationPromises = targetUsers.map(async (u) => {
+        try {
+          const notif = await Notification.create({
+            userId: u._id,
             title,
-            message,
+            body: message,
             type: "admin_broadcast",
-            createdAt: new Date(),
+            icon: "campaign",
           });
+
+          console.log(`✓ Notification created for user ${u._id}`);
+
+          if (io) {
+            // Must perfectly match the Flutter app's socket listener logic
+            io.to(u._id.toString()).emit("new_notification", notif);
+            // Maintain legacy emit just in case
+            io.to(u._id.toString()).emit("notification", {
+              title,
+              message,
+              type: "admin_broadcast",
+              createdAt: new Date(),
+            });
+          }
+        } catch (err) {
+          console.error(
+            `✗ Error creating notification for user ${u._id}:`,
+            err.message,
+          );
+          throw err;
         }
       });
 
-      await Promise.all(notificationPromises);
+      const results = await Promise.allSettled(notificationPromises);
+      const successful = results.filter((r) => r.status === "fulfilled").length;
+      const failed = results.filter((r) => r.status === "rejected").length;
+
+      if (failed > 0) {
+        console.warn(
+          `Notifications: ${successful} successful, ${failed} failed`,
+        );
+      }
 
       res.status(200).json({
         success: true,
         message: `Notification sent to ${targetUsers.length} recipient(s)`,
         recipientCount: targetUsers.length,
+        successful,
+        failed,
       });
     } catch (error) {
       console.error("Notification send error:", error.message);
-      res
-        .status(500)
-        .json({ success: false, message: "Failed to send notification" });
+      console.error("Full error:", error);
+      res.status(500).json({
+        success: false,
+        message: `Failed to send notification: ${error.message}`,
+      });
     }
   },
 );
@@ -684,8 +784,6 @@ router.put("/settings", verifyToken, requireRole("admin"), async (req, res) => {
 // ════════════════════════════════════════════════════════════════════════════════
 // HOUSING MANAGEMENT — Admin
 // ════════════════════════════════════════════════════════════════════════════════
-const HousingProperty = require("../models/housing-property.model");
-const HousingBooking = require("../models/housing-booking.model");
 
 // GET /api/admin/housing — List all properties (filterable by status)
 router.get("/housing", verifyToken, requireRole("admin"), async (req, res) => {
@@ -978,21 +1076,79 @@ router.get("/services", verifyToken, requireRole("admin"), async (req, res) => {
     if (serviceType) query.serviceType = serviceType;
     if (status) query.status = status;
     const services = await Service.find(query)
-      .populate("providerId", "username email phone city spSubRole")
+      .populate(
+        "serviceProviderId",
+        "firstName lastName email phone city spSubRole",
+      )
       .sort({ createdAt: -1 })
       .lean();
-    const enriched = services.map((s) => ({
-      ...s,
-      providerName: s.providerId?.username || "N/A",
-      providerEmail: s.providerId?.email,
-      providerPhone: s.providerId?.phone,
-      providerCity: s.providerId?.city,
-    }));
+    const enriched = services.map((s) => {
+      const provider = s.serviceProviderId;
+
+      // Try to get name from provider, fall back to serviceProviderName field
+      let providerName = "N/A";
+      if (provider && (provider.firstName || provider.lastName)) {
+        providerName =
+          `${provider.firstName || ""} ${provider.lastName || ""}`.trim();
+      } else if (s.serviceProviderName) {
+        providerName = s.serviceProviderName;
+      }
+
+      return {
+        ...s,
+        providerName: providerName,
+        providerEmail: provider?.email || s.serviceProviderEmail || "N/A",
+        providerPhone: provider?.phone || s.serviceProviderPhone || "N/A",
+        providerCity: provider?.city || s.serviceProviderCity || "N/A",
+      };
+    });
     res.json({ success: true, services: enriched, total: enriched.length });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 });
+
+// GET /api/admin/services/:id — Get single service details
+router.get(
+  "/services/:id",
+  verifyToken,
+  requireRole("admin"),
+  async (req, res) => {
+    try {
+      const service = await Service.findById(req.params.id)
+        .populate("serviceProviderId", "firstName lastName email phone city")
+        .lean();
+
+      if (!service) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Service not found" });
+      }
+
+      // Enrich with provider info
+      const provider = service.serviceProviderId;
+      let providerName = "N/A";
+      if (provider && (provider.firstName || provider.lastName)) {
+        providerName =
+          `${provider.firstName || ""} ${provider.lastName || ""}`.trim();
+      } else if (service.serviceProviderName) {
+        providerName = service.serviceProviderName;
+      }
+
+      const enriched = {
+        ...service,
+        providerName: providerName,
+        providerEmail: provider?.email || service.serviceProviderEmail || "N/A",
+        providerPhone: provider?.phone || service.serviceProviderPhone || "N/A",
+        providerCity: provider?.city || service.serviceProviderCity || "N/A",
+      };
+
+      res.json({ success: true, service: enriched });
+    } catch (error) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  },
+);
 
 // PATCH /api/admin/services/:id/status — Activate / Deactivate a service
 router.patch(

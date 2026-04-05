@@ -1,0 +1,202 @@
+[
+  {
+    "_id": {
+      "$oid": "64c9e1f2d4567890abc002d1"
+    },
+    "serviceName": "Single Room - Cozy & Private",
+    "description": "Comfortable single room with attached bathroom, fan, and basic furniture.",
+    "price": 8000,
+    "unit": "per month",
+    "serviceType": "Hostel/Flat Accommodation",
+    "accommodationType": "Single Room",
+    "serviceProviderId": {
+      "$oid": "69d29f3909ce95127ee91e35"
+    },
+    "serviceProviderRole": "Hostel/Flat Accommodation",
+    "serviceProviderName": "Manahil Pakeeza",
+    "serviceProviderEmail": "pakeezamanahil151@gmail.com",
+    "serviceProviderPhone": "03144957456",
+    "serviceProviderCity": "Faisalabad",
+    "serviceProviderAddress": "Street #1234",
+    "preparationTime": "Immediate",
+    "deliveryTime": "On availability",
+    "deliveryAvailable": false,
+    "pickupAvailable": false,
+    "imageUrl": "housing/single-room-manahil.jpg",
+    "rating": 4.5,
+    "totalReviews": 0,
+    "totalOrders": 0,
+    "status": "Active",
+    "featured": true,
+    "discountPercentage": 0,
+    "bedrooms": 1,
+    "bathrooms": 1,
+    "furniture": "Bed, Table, Chair, Almirah",
+    "createdAt": {
+      "$date": "2026-04-05T17:43:21.877Z"
+    },
+    "updatedAt": {
+      "$date": "2026-04-05T17:43:50.895Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "64c9e1f2d4567890abc002d2"
+    },
+    "serviceName": "Double Room - Spacious & Comfortable",
+    "description": "Spacious double room suitable for couples or friends with attached bathroom.",
+    "price": 12000,
+    "unit": "per month",
+    "serviceType": "Hostel/Flat Accommodation",
+    "accommodationType": "Double Room",
+    "serviceProviderId": {
+      "$oid": "69d29f3909ce95127ee91e35"
+    },
+    "serviceProviderRole": "Hostel/Flat Accommodation",
+    "serviceProviderName": "Manahil Pakeeza",
+    "serviceProviderEmail": "pakeezamanahil151@gmail.com",
+    "serviceProviderPhone": "03144957456",
+    "serviceProviderCity": "Faisalabad",
+    "serviceProviderAddress": "Street #1234",
+    "preparationTime": "Immediate",
+    "deliveryTime": "On availability",
+    "deliveryAvailable": false,
+    "pickupAvailable": false,
+    "imageUrl": "housing/double-room-manahil.jpg",
+    "rating": 4.6,
+    "totalReviews": 0,
+    "totalOrders": 0,
+    "status": "Active",
+    "featured": true,
+    "discountPercentage": 0,
+    "bedrooms": 1,
+    "bathrooms": 1,
+    "furniture": "Double Bed, 2 Tables, 2 Chairs, Almirah",
+    "createdAt": {
+      "$date": "2026-04-05T17:43:21.877Z"
+    },
+    "updatedAt": {
+      "$date": "2026-04-05T17:43:50.895Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "64c9e1f2d4567890abc002d3"
+    },
+    "serviceName": "Shared Dormitory - Budget Friendly",
+    "description": "Affordable shared dormitory room with 4 beds and common facilities.",
+    "price": 4500,
+    "unit": "per month",
+    "serviceType": "Hostel/Flat Accommodation",
+    "accommodationType": "Shared Dormitory",
+    "serviceProviderId": {
+      "$oid": "69d29f3909ce95127ee91e35"
+    },
+    "serviceProviderRole": "Hostel/Flat Accommodation",
+    "serviceProviderName": "Manahil Pakeeza",
+    "serviceProviderEmail": "pakeezamanahil151@gmail.com",
+    "serviceProviderPhone": "03144957456",
+    "serviceProviderCity": "Faisalabad",
+    "serviceProviderAddress": "Street #1234",
+    "preparationTime": "Immediate",
+    "deliveryTime": "On availability",
+    "deliveryAvailable": false,
+    "pickupAvailable": false,
+    "imageUrl": "housing/dormitory-manahil.jpg",
+    "rating": 4.4,
+    "totalReviews": 0,
+    "totalOrders": 0,
+    "status": "Active",
+    "featured": false,
+    "discountPercentage": 5,
+    "bedrooms": 1,
+    "bathrooms": 2,
+    "furniture": "Single Bed, Locker, Shelf",
+    "createdAt": {
+      "$date": "2026-04-05T17:43:21.877Z"
+    },
+    "updatedAt": {
+      "$date": "2026-04-05T17:43:50.895Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "64c9e1f2d4567890abc002d4"
+    },
+    "serviceName": "1 BHK Flat - Fully Furnished",
+    "description": "Complete 1 BHK flat with living room, kitchen, and modern amenities.",
+    "price": 25000,
+    "unit": "per month",
+    "serviceType": "Hostel/Flat Accommodation",
+    "accommodationType": "Flat/Apartment",
+    "serviceProviderId": {
+      "$oid": "69d29f3909ce95127ee91e35"
+    },
+    "serviceProviderRole": "Hostel/Flat Accommodation",
+    "serviceProviderName": "Manahil Pakeeza",
+    "serviceProviderEmail": "pakeezamanahil151@gmail.com",
+    "serviceProviderPhone": "03144957456",
+    "serviceProviderCity": "Faisalabad",
+    "serviceProviderAddress": "Street #1234",
+    "preparationTime": "Immediate",
+    "deliveryTime": "On availability",
+    "deliveryAvailable": false,
+    "pickupAvailable": false,
+    "imageUrl": "housing/1bhk-flat-manahil.jpg",
+    "rating": 4.7,
+    "totalReviews": 0,
+    "totalOrders": 0,
+    "status": "Active",
+    "featured": true,
+    "discountPercentage": 0,
+    "bedrooms": 1,
+    "bathrooms": 1,
+    "furniture": "Bed, Sofa, Dining Table, Kitchen Equipment, Wardrobe",
+    "createdAt": {
+      "$date": "2026-04-05T17:43:21.877Z"
+    },
+    "updatedAt": {
+      "$date": "2026-04-05T17:43:50.895Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "64c9e1f2d4567890abc002d5"
+    },
+    "serviceName": "Studio Apartment - Premium",
+    "description": "Modern studio apartment with AC, WiFi, and premium furniture.",
+    "price": 18000,
+    "unit": "per month",
+    "serviceType": "Hostel/Flat Accommodation",
+    "accommodationType": "Studio Apartment",
+    "serviceProviderId": {
+      "$oid": "69d29f3909ce95127ee91e35"
+    },
+    "serviceProviderRole": "Hostel/Flat Accommodation",
+    "serviceProviderName": "Manahil Pakeeza",
+    "serviceProviderEmail": "pakeezamanahil151@gmail.com",
+    "serviceProviderPhone": "03144957456",
+    "serviceProviderCity": "Faisalabad",
+    "serviceProviderAddress": "Street #1234",
+    "preparationTime": "Immediate",
+    "deliveryTime": "On availability",
+    "deliveryAvailable": false,
+    "pickupAvailable": false,
+    "imageUrl": "housing/studio-premium-manahil.jpg",
+    "rating": 4.8,
+    "totalReviews": 0,
+    "totalOrders": 0,
+    "status": "Active",
+    "featured": false,
+    "discountPercentage": 0,
+    "bedrooms": 1,
+    "bathrooms": 1,
+    "furniture": "Double Bed, Sofa, Kitchenette, Premium Wardrobe",
+    "createdAt": {
+      "$date": "2026-04-05T17:43:21.877Z"
+    },
+    "updatedAt": {
+      "$date": "2026-04-05T17:43:50.895Z"
+    }
+  }
+]

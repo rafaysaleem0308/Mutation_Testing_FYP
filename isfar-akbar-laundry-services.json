@@ -1,0 +1,314 @@
+[
+  {
+    "_id": {
+      "$oid": "64b8c91f2d4567890abc001a"
+    },
+    "serviceName": "Standard Laundry Service",
+    "description": "Professional laundry service for everyday clothes. Fast turnaround with careful washing and drying. Perfect for casual wear, t-shirts, and everyday garments.",
+    "price": 150,
+    "serviceType": "Laundry",
+    "laundryType": "Standard Wash",
+    "serviceProviderId": {
+      "$oid": "69d29aa209ce95127ee91ac8"
+    },
+    "serviceProviderRole": "Laundry",
+    "serviceProviderName": "Isfar Akbar",
+    "serviceProviderEmail": "isfarakbar94@gmail.com",
+    "serviceProviderPhone": "03307180425",
+    "serviceProviderCity": "Gojra",
+    "serviceProviderAddress": "Street chiniot 1234",
+    "mealType": null,
+    "cuisineType": null,
+    "isVegetarian": null,
+    "isSpicy": null,
+    "hasDairy": null,
+    "hasGluten": null,
+    "preparationTime": "2 days",
+    "deliveryTime": "Same day or next day",
+    "deliveryAvailable": true,
+    "pickupAvailable": true,
+    "ingredients": [],
+    "allergens": [],
+    "nutritionInfo": null,
+    "imageUrl": "laundry/standard-laundry.jpg",
+    "additionalImages": [
+      "laundry/standard-laundry-1.jpg",
+      "laundry/standard-laundry-2.jpg"
+    ],
+    "rating": 4.6,
+    "totalReviews": 28,
+    "totalOrders": 0,
+    "availableDays": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday"
+    ],
+    "availableTimeSlots": [
+      {
+        "startTime": "09:00 AM",
+        "endTime": "05:00 PM"
+      }
+    ],
+    "status": "Active",
+    "featured": true,
+    "discountPercentage": 0,
+    "tags": ["Laundry", "Standard", "Fast", "Affordable", "Daily Wear"],
+    "createdAt": {
+      "$date": "2026-04-05T09:00:00Z"
+    },
+    "updatedAt": {
+      "$date": "2026-04-05T09:00:00Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "64b8c91f2d4567890abc001b"
+    },
+    "serviceName": "Premium Dry Cleaning",
+    "description": "Expert dry cleaning service for formal wear, suits, and delicate fabrics. Professional stain removal and pressing. Suitable for fancy dresses, jackets, and premium clothing.",
+    "price": 250,
+    "serviceType": "Laundry",
+    "laundryType": "Dry Cleaning",
+    "serviceProviderId": {
+      "$oid": "69d29aa209ce95127ee91ac8"
+    },
+    "serviceProviderRole": "Laundry",
+    "serviceProviderName": "Isfar Akbar",
+    "serviceProviderEmail": "isfarakbar94@gmail.com",
+    "serviceProviderPhone": "03307180425",
+    "serviceProviderCity": "Gojra",
+    "serviceProviderAddress": "Street chiniot 1234",
+    "mealType": null,
+    "cuisineType": null,
+    "isVegetarian": null,
+    "isSpicy": null,
+    "hasDairy": null,
+    "hasGluten": null,
+    "preparationTime": "3 days",
+    "deliveryTime": "3-4 days",
+    "deliveryAvailable": true,
+    "pickupAvailable": true,
+    "ingredients": [],
+    "allergens": [],
+    "nutritionInfo": null,
+    "imageUrl": "laundry/dry-cleaning.jpg",
+    "additionalImages": [
+      "laundry/dry-cleaning-1.jpg",
+      "laundry/dry-cleaning-2.jpg"
+    ],
+    "rating": 4.8,
+    "totalReviews": 42,
+    "totalOrders": 0,
+    "availableDays": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday"
+    ],
+    "availableTimeSlots": [
+      {
+        "startTime": "09:00 AM",
+        "endTime": "05:00 PM"
+      }
+    ],
+    "status": "Active",
+    "featured": true,
+    "discountPercentage": 0,
+    "tags": ["Dry Cleaning", "Premium", "Formal Wear", "Suits", "Careful"],
+    "createdAt": {
+      "$date": "2026-04-03T10:15:00Z"
+    },
+    "updatedAt": {
+      "$date": "2026-04-03T10:15:00Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "64b8c91f2d4567890abc001c"
+    },
+    "serviceName": "Delicate & Hand Wash Service",
+    "description": "Gentle hand-washing service for delicate fabrics, silks, and precious garments. Special care with premium detergents. Perfect for silk scarves, designer wear, and sensitive materials.",
+    "price": 200,
+    "serviceType": "Laundry",
+    "laundryType": "Hand Wash",
+    "serviceProviderId": {
+      "$oid": "69d29aa209ce95127ee91ac8"
+    },
+    "serviceProviderRole": "Laundry",
+    "serviceProviderName": "Isfar Akbar",
+    "serviceProviderEmail": "isfarakbar94@gmail.com",
+    "serviceProviderPhone": "03307180425",
+    "serviceProviderCity": "Gojra",
+    "serviceProviderAddress": "Street chiniot 1234",
+    "mealType": null,
+    "cuisineType": null,
+    "isVegetarian": null,
+    "isSpicy": null,
+    "hasDairy": null,
+    "hasGluten": null,
+    "preparationTime": "3 days",
+    "deliveryTime": "3 days",
+    "deliveryAvailable": true,
+    "pickupAvailable": true,
+    "ingredients": [],
+    "allergens": [],
+    "nutritionInfo": null,
+    "imageUrl": "laundry/delicate-wash.jpg",
+    "additionalImages": ["laundry/delicate-wash-1.jpg"],
+    "rating": 4.7,
+    "totalReviews": 19,
+    "totalOrders": 0,
+    "availableDays": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday"
+    ],
+    "availableTimeSlots": [
+      {
+        "startTime": "10:00 AM",
+        "endTime": "04:00 PM"
+      }
+    ],
+    "status": "Active",
+    "featured": false,
+    "discountPercentage": 5,
+    "tags": ["Delicate", "Hand Wash", "Silk", "Premium Fabric", "Careful Care"],
+    "createdAt": {
+      "$date": "2026-04-02T14:30:00Z"
+    },
+    "updatedAt": {
+      "$date": "2026-04-02T14:30:00Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "64b8c91f2d4567890abc001d"
+    },
+    "serviceName": "Express Laundry (24 Hours)",
+    "description": "Quick turnaround laundry service completed within 24 hours. Perfect for urgent needs and travel. Same day or early morning next day delivery available.",
+    "price": 180,
+    "serviceType": "Laundry",
+    "laundryType": "Express Service",
+    "serviceProviderId": {
+      "$oid": "69d29aa209ce95127ee91ac8"
+    },
+    "serviceProviderRole": "Laundry",
+    "serviceProviderName": "Isfar Akbar",
+    "serviceProviderEmail": "isfarakbar94@gmail.com",
+    "serviceProviderPhone": "03307180425",
+    "serviceProviderCity": "Gojra",
+    "serviceProviderAddress": "Street chiniot 1234",
+    "mealType": null,
+    "cuisineType": null,
+    "isVegetarian": null,
+    "isSpicy": null,
+    "hasDairy": null,
+    "hasGluten": null,
+    "preparationTime": "24 hours",
+    "deliveryTime": "24 hours",
+    "deliveryAvailable": true,
+    "pickupAvailable": true,
+    "ingredients": [],
+    "allergens": [],
+    "nutritionInfo": null,
+    "imageUrl": "laundry/express-laundry.jpg",
+    "additionalImages": [],
+    "rating": 4.5,
+    "totalReviews": 15,
+    "totalOrders": 0,
+    "availableDays": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday"
+    ],
+    "availableTimeSlots": [
+      {
+        "startTime": "08:00 AM",
+        "endTime": "08:00 PM"
+      }
+    ],
+    "status": "Active",
+    "featured": false,
+    "discountPercentage": 0,
+    "tags": ["Express", "24 Hours", "Urgent", "Quick", "Same Day"],
+    "createdAt": {
+      "$date": "2026-04-04T11:00:00Z"
+    },
+    "updatedAt": {
+      "$date": "2026-04-04T11:00:00Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "64b8c91f2d4567890abc001e"
+    },
+    "serviceName": "Ironing & Pressing Service",
+    "description": "Professional ironing and pressing service for all fabric types. Expert steam pressing for perfect finish. Available for individual pieces or bulk orders. Includes hanging and packaging.",
+    "price": 50,
+    "serviceType": "Laundry",
+    "laundryType": "Iron & Press",
+    "serviceProviderId": {
+      "$oid": "69d29aa209ce95127ee91ac8"
+    },
+    "serviceProviderRole": "Laundry",
+    "serviceProviderName": "Isfar Akbar",
+    "serviceProviderEmail": "isfarakbar94@gmail.com",
+    "serviceProviderPhone": "03307180425",
+    "serviceProviderCity": "Gojra",
+    "serviceProviderAddress": "Street chiniot 1234",
+    "mealType": null,
+    "cuisineType": null,
+    "isVegetarian": null,
+    "isSpicy": null,
+    "hasDairy": null,
+    "hasGluten": null,
+    "preparationTime": "1 day",
+    "deliveryTime": "Same day",
+    "deliveryAvailable": true,
+    "pickupAvailable": true,
+    "ingredients": [],
+    "allergens": [],
+    "nutritionInfo": null,
+    "imageUrl": "laundry/ironing-service.jpg",
+    "additionalImages": ["laundry/ironing-service-1.jpg"],
+    "rating": 4.4,
+    "totalReviews": 22,
+    "totalOrders": 0,
+    "availableDays": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday"
+    ],
+    "availableTimeSlots": [
+      {
+        "startTime": "09:00 AM",
+        "endTime": "06:00 PM"
+      }
+    ],
+    "status": "Active",
+    "featured": true,
+    "discountPercentage": 10,
+    "tags": ["Ironing", "Pressing", "Steam", "Professional", "Quick"],
+    "createdAt": {
+      "$date": "2026-04-01T13:20:00Z"
+    },
+    "updatedAt": {
+      "$date": "2026-04-01T13:20:00Z"
+    }
+  }
+]

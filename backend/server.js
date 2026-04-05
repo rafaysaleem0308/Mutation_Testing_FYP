@@ -74,6 +74,8 @@ const adminRoutes = require("./routes/admin.routes");
 const housingRoutes = require("./routes/housing.routes");
 const cartRoutes = require("./routes/cart.routes");
 const paymentRoutes = require("./routes/payment.routes");
+const communityRoutes = require("./routes/community.routes");
+const recommendationsRoutes = require("./routes/recommendations.routes");
 
 app.use("/api/orders", orderRoutes);
 app.use("/signup/user", signupLimiter, userRoutes);
@@ -88,6 +90,8 @@ app.use("/api/reviews", reviewRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/payments", paymentLimiter, paymentRoutes); // Payment routes with rate limiting
+app.use("/api/community", communityRoutes);
+app.use("/api/recommendations", recommendationsRoutes);
 
 // ─── Health Check ────────────────────────────────────────────────────────────
 app.get("/health", (req, res) => {
@@ -96,12 +100,10 @@ app.get("/health", (req, res) => {
 
 // ─── 404 Handler ─────────────────────────────────────────────────────────────
 app.use((req, res) => {
-  res
-    .status(404)
-    .json({
-      success: false,
-      message: `Route ${req.method} ${req.url} not found`,
-    });
+  res.status(404).json({
+    success: false,
+    message: `Route ${req.method} ${req.url} not found`,
+  });
 });
 
 // ─── Global Error Handler ────────────────────────────────────────────────────
