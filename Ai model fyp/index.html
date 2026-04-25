@@ -1,0 +1,1289 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>💰 AI Expense Planner - Budget Management</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --primary: #2e86ab;
+        --success: #2ecc71;
+        --danger: #e74c3c;
+        --warning: #f39c12;
+        --info: #3498db;
+        --meal: #2ecc71;
+        --laundry: #3498db;
+        --maintenance: #e74c3c;
+        --bg-light: #f8f9fa;
+        --bg-dark: #2c3e50;
+        --text-dark: #2c3e50;
+        --text-light: #7f8c8d;
+        --border: #ecf0f1;
+        --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.15);
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+        color: var(--text-dark);
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      header {
+        text-align: center;
+        color: white;
+        margin-bottom: 40px;
+        animation: slideDown 0.6s ease-out;
+      }
+
+      header h1 {
+        font-size: 2.8em;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      header p {
+        font-size: 1.1em;
+        opacity: 0.95;
+      }
+
+      .main-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.2fr;
+        gap: 30px;
+        margin-bottom: 40px;
+      }
+
+      @media (max-width: 768px) {
+        .main-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      #dailyPlanContainer {
+        display: none;
+      }
+
+      .tips-section {
+        display: none;
+      }
+
+      .card {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: var(--shadow-lg);
+        animation: fadeIn 0.6s ease-out;
+      }
+
+      .card h2 {
+        color: var(--text-dark);
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.5em;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: var(--text-dark);
+        font-size: 0.95em;
+      }
+
+      input[type="text"],
+      input[type="number"],
+      select {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        font-size: 1em;
+        transition: all 0.3s ease;
+        font-family: inherit;
+      }
+
+      input[type="text"]:focus,
+      input[type="number"]:focus,
+      select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(46, 134, 171, 0.1);
+      }
+
+      .category-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+
+      .category-btn {
+        padding: 15px;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        background: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.9em;
+        font-weight: 600;
+        text-align: center;
+      }
+
+      .category-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow);
+      }
+
+      .category-btn.active {
+        border-color: var(--primary);
+        background: var(--primary);
+        color: white;
+      }
+
+      .category-btn.meal {
+        border-left: 4px solid var(--meal);
+      }
+      .category-btn.meal.active {
+        background: var(--meal);
+        border-color: var(--meal);
+      }
+
+      .category-btn.laundry {
+        border-left: 4px solid var(--laundry);
+      }
+      .category-btn.laundry.active {
+        background: var(--laundry);
+        border-color: var(--laundry);
+      }
+
+      .category-btn.maintenance {
+        border-left: 4px solid var(--maintenance);
+      }
+      .category-btn.maintenance.active {
+        background: var(--maintenance);
+        border-color: var(--maintenance);
+      }
+
+      .button-group {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+      }
+
+      button {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .btn-primary {
+        background: var(--primary);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: #1f5a7a;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .btn-secondary {
+        background: var(--bg-light);
+        color: var(--text-dark);
+        border: 2px solid var(--border);
+      }
+
+      .btn-secondary:hover {
+        background: var(--border);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      .results-container {
+        grid-column: 1 / -1;
+      }
+
+      .results-card {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: var(--shadow-lg);
+        display: none;
+        animation: slideUp 0.6s ease-out;
+      }
+
+      .results-card.active {
+        display: block;
+      }
+
+      .plan-header {
+        background: linear-gradient(135deg, var(--primary), #667eea);
+        color: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 25px;
+      }
+
+      .plan-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+        margin-bottom: 25px;
+      }
+
+      @media (max-width: 768px) {
+        .plan-stats {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      .stat-box {
+        background: var(--bg-light);
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 4px solid var(--primary);
+      }
+
+      .stat-label {
+        color: var(--text-light);
+        font-size: 0.85em;
+        margin-bottom: 5px;
+      }
+
+      .stat-value {
+        font-size: 1.5em;
+        font-weight: bold;
+        color: var(--primary);
+      }
+
+      .daily-plan {
+        background: var(--bg-light);
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 15px;
+        border-left: 4px solid var(--primary);
+      }
+
+      .day-number {
+        display: inline-block;
+        background: var(--primary);
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-weight: bold;
+        margin-right: 10px;
+        font-size: 0.9em;
+      }
+
+      .day-items {
+        margin: 10px 0;
+        line-height: 1.6;
+      }
+
+      .item {
+        display: inline-block;
+        background: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        margin: 5px 5px 5px 0;
+        border: 1px solid var(--border);
+        font-size: 0.9em;
+      }
+
+      .day-amount {
+        font-weight: bold;
+        color: var(--success);
+        float: right;
+      }
+
+      .summary-section {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        padding: 20px;
+        border-radius: 8px;
+        margin-top: 25px;
+      }
+
+      .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      }
+
+      .summary-row:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+      }
+
+      .summary-label {
+        font-weight: 600;
+        color: var(--text-dark);
+      }
+
+      .summary-value {
+        font-weight: bold;
+        color: var(--primary);
+      }
+
+      .tips-section {
+        background: #fff9e6;
+        padding: 20px;
+        border-radius: 8px;
+        border-left: 4px solid var(--warning);
+        margin-top: 20px;
+      }
+
+      .tips-section h3 {
+        color: var(--text-dark);
+        margin-bottom: 10px;
+      }
+
+      .tips-section ul {
+        margin-left: 20px;
+        color: var(--text-dark);
+      }
+
+      .tips-section li {
+        margin-bottom: 8px;
+        line-height: 1.5;
+      }
+
+      .error-message {
+        background: #fadbd8;
+        color: #c0392b;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border-left: 4px solid var(--danger);
+        display: none;
+      }
+
+      .error-message.show {
+        display: block;
+        animation: shake 0.5s ease-in-out;
+      }
+
+      .success-message {
+        background: #d5f4e6;
+        color: #27ae60;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border-left: 4px solid var(--success);
+        display: none;
+      }
+
+      .success-message.show {
+        display: block;
+        animation: fadeIn 0.5s ease-in-out;
+      }
+
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-10px);
+        }
+        75% {
+          transform: translateX(10px);
+        }
+      }
+
+      .feature-icons {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 2px solid var(--border);
+      }
+
+      .feature {
+        text-align: center;
+        color: var(--text-light);
+        font-size: 0.9em;
+      }
+
+      .feature-icon {
+        font-size: 1.8em;
+        margin-bottom: 5px;
+      }
+
+      footer {
+        text-align: center;
+        color: white;
+        margin-top: 50px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .loading {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @keyframes blink {
+        0%,
+        49% {
+          opacity: 1;
+        }
+        50%,
+        100% {
+          opacity: 0;
+        }
+      }
+
+      .info-box {
+        background: #e8f4f8;
+        color: #0e6b7e;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border-left: 4px solid #17a2b8;
+        font-size: 0.95em;
+        line-height: 1.6;
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.8em;
+        font-weight: 600;
+      }
+
+      .badge-meal {
+        background: rgba(46, 204, 113, 0.2);
+        color: var(--meal);
+      }
+      .badge-laundry {
+        background: rgba(52, 152, 219, 0.2);
+        color: var(--laundry);
+      }
+      .badge-maintenance {
+        background: rgba(231, 76, 60, 0.2);
+        color: var(--maintenance);
+      }
+
+      .no-results {
+        text-align: center;
+        padding: 40px;
+        color: var(--text-light);
+      }
+
+      .no-results-icon {
+        font-size: 3em;
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <header>
+        <h1>💰 AI Expense Planner</h1>
+        <p>Smart Budget Planning for Meal, Laundry & Maintenance</p>
+      </header>
+
+      <!-- Main Content -->
+      <div class="main-grid">
+        <!-- Input Card -->
+        <div class="card">
+          <h2>📝 Plan Your Budget</h2>
+
+          <div id="errorMessage" class="error-message"></div>
+          <div id="successMessage" class="success-message"></div>
+
+          <div class="info-box">
+            💡 <strong>Example Input:</strong><br />
+            • "I have 3000 rupees for 2 weeks for meals"<br />
+            • "5000 PKR for 1 month laundry"<br />
+            • "2000 rupees for 10 days maintenance"
+          </div>
+
+          <!-- Natural Language Input (Main) -->
+          <div class="form-group">
+            <label for="userInput">💬 Describe Your Budget</label>
+            <input
+              type="text"
+              id="userInput"
+              placeholder="e.g., I need to plan 3000 rupees for 2 weeks for meals"
+              autocomplete="off"
+              style="font-size: 1.05em; padding: 15px"
+            />
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="button-group">
+            <button
+              class="btn-primary"
+              onclick="generateChatPlan()"
+              style="width: 100%; font-size: 1.1em"
+            >
+              🤖 Generate Plan
+            </button>
+            <button
+              class="btn-secondary"
+              onclick="resetForm()"
+              style="width: 100%"
+            >
+              🔄 Reset
+            </button>
+          </div>
+
+          <!-- Features -->
+          <div class="feature-icons">
+            <div class="feature">
+              <div class="feature-icon">🧠</div>
+              <div>NLP-Powered</div>
+            </div>
+            <div class="feature">
+              <div class="feature-icon">📊</div>
+              <div>Real-time</div>
+            </div>
+            <div class="feature">
+              <div class="feature-icon">🇵🇰</div>
+              <div>PKR Based</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Results Preview Card / Chat Area -->
+        <div class="card">
+          <h2>💬 AI Assistant</h2>
+          <div
+            id="chatBox"
+            style="
+              height: 600px;
+              overflow-y: auto;
+              background: #f8f9fa;
+              border-radius: 8px;
+              padding: 15px;
+              border: 1px solid var(--border);
+            "
+          >
+            <div
+              style="
+                text-align: center;
+                color: var(--text-light);
+                padding: 50px 20px;
+              "
+            >
+              <div style="font-size: 2.5em; margin-bottom: 10px">🤖</div>
+              <p>Start by describing your budget in the left panel</p>
+              <p style="font-size: 0.9em; margin-top: 10px">
+                I'll analyze it and create a personalized plan for you
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Full Results -->
+      <div id="resultsCard" class="card results-card">
+        <div class="plan-header">
+          <h2 style="margin: 0">✅ Your Expense Plan</h2>
+          <p id="planTitle" style="margin: 10px 0 0 0; opacity: 0.9"></p>
+        </div>
+
+        <!-- Statistics -->
+        <div class="plan-stats">
+          <div class="stat-box">
+            <div class="stat-label">Daily Allowance</div>
+            <div class="stat-value" id="dailyBudgetDisplay">Rs 0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Total Budget</div>
+            <div class="stat-value" id="totalBudgetDisplay">Rs 0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Total Planned</div>
+            <div class="stat-value" id="totalSpentDisplay">Rs 0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Remaining</div>
+            <div class="stat-value" id="remainingDisplay">Rs 0</div>
+          </div>
+        </div>
+
+        <!-- Daily Plan -->
+        <div
+          id="dailyPlanContainer"
+          style="max-height: 500px; overflow-y: auto"
+        >
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Money-Saving Tips -->
+        <div class="tips-section">
+          <h3>💡 Money-Saving Tips</h3>
+          <ul>
+            <li>
+              <strong>Meal Planning:</strong> Buy items in bulk, avoid daily
+              shopping for better prices
+            </li>
+            <li>
+              <strong>Seasonal Produce:</strong> Choose vegetables that are in
+              season to save up to 30%
+            </li>
+            <li>
+              <strong>Batch Cooking:</strong> Prepare meals in batches to save
+              time and money
+            </li>
+            <li>
+              <strong>Budget Buffer:</strong> Keep 10-15% of your budget as
+              emergency reserve
+            </li>
+          </ul>
+        </div>
+
+        <!-- Export Button (Hidden) -->
+        <div style="text-align: center; margin-top: 25px; display: none">
+          <button
+            class="btn-primary"
+            onclick="exportPlan()"
+            style="width: 100%"
+          >
+            📥 Download as CSV
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <p>🚀 Built with AI | 💼 Smart Budget Management | 🇵🇰 For Pakistan</p>
+      <p style="font-size: 0.9em; margin-top: 10px">
+        © 2026 AI Expense Planner | Powered by Claude AI
+      </p>
+    </footer>
+
+    <script>
+      // ==========================================
+      // API CONFIGURATION
+      // ==========================================
+
+      const API_BASE_URL = "http://localhost:5000/api";
+
+      // ==========================================
+      // DATA & CONFIGURATION
+      // ==========================================
+
+      let CATEGORIES = {
+        meal: {
+          label: "Meal",
+          icon: "🍱",
+          maxItemsPerDay: 3,
+          items: [],
+          prices: {},
+        },
+        laundry: {
+          label: "Laundry",
+          icon: "🧺",
+          maxItemsPerDay: 2,
+          items: [],
+          prices: {},
+        },
+        maintenance: {
+          label: "Maintenance",
+          icon: "🔧",
+          maxItemsPerDay: 2,
+          items: [],
+          prices: {},
+        },
+      };
+
+      const EXCHANGE_RATES = {
+        INR_TO_PKR: 3.3,
+        USD_TO_PKR: 278.0,
+      };
+
+      // ==========================================
+      // STATE VARIABLES
+      // ==========================================
+
+      let selectedCategory = "meal";
+      let currentPlan = null;
+      let chatHistory = [];
+
+      // ==========================================
+      // UTILITY FUNCTIONS
+      // ==========================================
+
+      function setCategory(category) {
+        selectedCategory = category;
+        document.querySelectorAll(".category-btn").forEach((btn) => {
+          btn.classList.remove("active");
+        });
+        event.target.classList.add("active");
+      }
+
+      function showError(message) {
+        const errorDiv = document.getElementById("errorMessage");
+        errorDiv.textContent = message;
+        errorDiv.classList.add("show");
+        setTimeout(() => {
+          errorDiv.classList.remove("show");
+        }, 5000);
+      }
+
+      function showSuccess(message) {
+        const successDiv = document.getElementById("successMessage");
+        successDiv.textContent = message;
+        successDiv.classList.add("show");
+        setTimeout(() => {
+          successDiv.classList.remove("show");
+        }, 3000);
+      }
+
+      function formatCurrency(amount) {
+        return "Rs " + Math.round(amount).toLocaleString("en-PK");
+      }
+
+      function parseNaturalInput(text) {
+        if (!text) return null;
+
+        text = text.toLowerCase();
+
+        // Extract budget (try "number currency" first - more reliable)
+        let budgetMatch = text.match(/([\d,]+)\s*(?:rupees?|rs\.?|pkr)/);
+        if (!budgetMatch) {
+          // Fallback: try "currency number" pattern
+          budgetMatch = text.match(/(?:rupees?|rs\.?|pkr)\s+([\d,]+)/);
+        }
+        const budget = budgetMatch
+          ? parseFloat(budgetMatch[1].replace(/,/g, ""))
+          : null;
+
+        // Extract duration (fixed: use 's?' to handle plural forms)
+        let durationMatch = text.match(
+          /(\d+)\s*(days?|weeks?|months?|din|hafte|mahine)/i,
+        );
+        let days = null;
+        if (durationMatch) {
+          const num = parseInt(durationMatch[1]);
+          const unit = durationMatch[2].toLowerCase();
+          if (unit.includes("day") || unit === "din") days = num;
+          else if (unit.includes("week") || unit === "hafte") days = num * 7;
+          else if (unit.includes("month") || unit === "mahine") days = num * 30;
+        }
+
+        // Detect category
+        let category = "meal";
+        if (
+          text.includes("laundry") ||
+          text.includes("wash") ||
+          text.includes("dhobi") ||
+          text.includes("kapray")
+        ) {
+          category = "laundry";
+        } else if (
+          text.includes("maintenance") ||
+          text.includes("repair") ||
+          text.includes("bijli") ||
+          text.includes("gas") ||
+          text.includes("paani") ||
+          text.includes("ghar")
+        ) {
+          category = "maintenance";
+        }
+
+        return { budget, days, category };
+      }
+
+      function validateInput(budget, days, category) {
+        if (!budget || budget <= 0) {
+          showError("❌ Please enter a valid budget amount (Rs 100 or more)");
+          return false;
+        }
+        if (budget < 100) {
+          showError("❌ Minimum budget is Rs 100");
+          return false;
+        }
+        if (!days || days <= 0 || days > 365) {
+          showError("❌ Please enter a valid duration (1-365 days)");
+          return false;
+        }
+        if (!["meal", "laundry", "maintenance"].includes(category)) {
+          showError("❌ Please select a valid category");
+          return false;
+        }
+        return true;
+      }
+
+      // ==========================================
+      // MAIN PLANNER LOGIC - CHAT INTERFACE
+      // ==========================================
+
+      function clearChat() {
+        chatHistory = [];
+        document.getElementById("chatBox").innerHTML = `
+          <div style="text-align: center; color: var(--text-light); padding: 50px 20px;">
+            <div style="font-size: 2.5em; margin-bottom: 10px;">🤖</div>
+            <p>Start by describing your budget</p>
+          </div>
+        `;
+      }
+
+      function addChatMessage(role, content, isTyping = false) {
+        chatHistory.push({ role, content });
+
+        const chatBox = document.getElementById("chatBox");
+        const messageDiv = document.createElement("div");
+        messageDiv.style.marginBottom = "15px";
+        messageDiv.style.padding = "12px";
+        messageDiv.style.borderRadius = "8px";
+        messageDiv.style.lineHeight = "1.6";
+
+        if (role === "user") {
+          messageDiv.style.background = "#e3f2fd";
+          messageDiv.style.color = "#0d47a1";
+          messageDiv.style.marginLeft = "20px";
+          messageDiv.style.border = "1px solid #bbdefb";
+          messageDiv.innerHTML = content
+            .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+            .replace(/\n/g, "<br>");
+          chatBox.appendChild(messageDiv);
+        } else {
+          messageDiv.style.background = "white";
+          messageDiv.style.color = "#2c3e50";
+          messageDiv.style.marginRight = "20px";
+          messageDiv.style.border = "1px solid #ecf0f1";
+          chatBox.appendChild(messageDiv);
+
+          if (isTyping) {
+            // Typing effect for AI messages
+            let index = 0;
+            const typingSpeed = 15; // milliseconds per character
+            const originalContent = content
+              .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+              .replace(/\n/g, "<br>");
+
+            function typeCharacter() {
+              if (index < content.length) {
+                const char = content[index];
+                const textSoFar = content.substring(0, index + 1);
+                const formattedText = textSoFar
+                  .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+                  .replace(/\n/g, "<br>");
+                messageDiv.innerHTML =
+                  formattedText +
+                  '<span style="animation: blink 1s infinite;">▌</span>';
+                index++;
+                chatBox.scrollTop = chatBox.scrollHeight;
+                setTimeout(typeCharacter, typingSpeed);
+              } else {
+                // Remove cursor after typing completes
+                messageDiv.innerHTML = originalContent;
+                chatBox.scrollTop = chatBox.scrollHeight;
+              }
+            }
+
+            typeCharacter();
+          } else {
+            messageDiv.innerHTML = content
+              .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+              .replace(/\n/g, "<br>");
+          }
+        }
+
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+
+      function generateChatPlan() {
+        const userInput = document.getElementById("userInput").value.trim();
+
+        if (!userInput) {
+          showError("❌ Please describe your budget first");
+          return;
+        }
+
+        // Add user message to chat
+        addChatMessage("user", userInput);
+        document.getElementById("userInput").value = "";
+
+        // Show loading indicator
+        const chatBox = document.getElementById("chatBox");
+        const loadingDiv = document.createElement("div");
+        loadingDiv.id = "loadingIndicator";
+        loadingDiv.style.textAlign = "center";
+        loadingDiv.style.padding = "15px";
+        loadingDiv.innerHTML =
+          '<div class="loading" style="display: inline-block; border-color: #2e86ab;"></div> Analyzing your request...';
+        chatBox.appendChild(loadingDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        generateChatPlanViaAPI(userInput);
+      }
+
+      // ==========================================
+      // API FUNCTIONS
+      // ==========================================
+
+      async function loadDatasetsFromAPI() {
+        // Load datasets from Flask API backend
+        try {
+          console.log("📡 Loading datasets from API...");
+          const response = await fetch(`${API_BASE_URL}/datasets`);
+
+          if (!response.ok) {
+            throw new Error(`API error: ${response.status}`);
+          }
+
+          const data = await response.json();
+
+          // Update CATEGORIES with API data
+          CATEGORIES = {
+            meal: {
+              label: "Meal",
+              icon: "🍱",
+              maxItemsPerDay: 3,
+              items: (data.meal || []).map((item) => item.name),
+              prices: Object.fromEntries(
+                (data.meal || []).map((item) => [item.name, item.price]),
+              ),
+            },
+            laundry: {
+              label: "Laundry",
+              icon: "🧺",
+              maxItemsPerDay: 2,
+              items: (data.laundry || []).map((item) => item.name),
+              prices: Object.fromEntries(
+                (data.laundry || []).map((item) => [item.name, item.price]),
+              ),
+            },
+            maintenance: {
+              label: "Maintenance",
+              icon: "🔧",
+              maxItemsPerDay: 2,
+              items: (data.maintenance || []).map((item) => item.name),
+              prices: Object.fromEntries(
+                (data.maintenance || []).map((item) => [item.name, item.price]),
+              ),
+            },
+          };
+
+          console.log("✅ Datasets loaded from API");
+          return true;
+        } catch (error) {
+          console.warn("⚠️  API not available:", error);
+          return false;
+        }
+      }
+
+      async function generateChatPlanViaAPI(userInput) {
+        // Generate plan using Flask API backend with chat interface
+        try {
+          console.log(`📡 Generating chat plan via API...`);
+
+          const response = await fetch(`${API_BASE_URL}/chat-plan`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              text: userInput,
+            }),
+          });
+
+          // Remove loading indicator
+          const loadingDiv = document.getElementById("loadingIndicator");
+          if (loadingDiv) loadingDiv.remove();
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "API error");
+          }
+
+          const data = await response.json();
+          currentPlan = data.plan;
+
+          // Combine consecutive messages with the same role into a single message
+          const mergedMessages = [];
+          if (data.chat_messages && Array.isArray(data.chat_messages)) {
+            for (const msg of data.chat_messages) {
+              if (
+                mergedMessages.length > 0 &&
+                mergedMessages[mergedMessages.length - 1].role === msg.role
+              ) {
+                // Combine with previous message if same role
+                mergedMessages[mergedMessages.length - 1].content +=
+                  "\n" + msg.content;
+              } else {
+                // Add new message
+                mergedMessages.push({ role: msg.role, content: msg.content });
+              }
+            }
+          }
+
+          // Display merged chat messages
+          if (mergedMessages && Array.isArray(mergedMessages)) {
+            mergedMessages.forEach((msg) => {
+              const isTyping = msg.role === "assistant";
+              addChatMessage(msg.role, msg.content, isTyping);
+            });
+          }
+
+          // Also display the full plan in the results card
+          displayPlan(currentPlan);
+          showSuccess("✅ Plan generated by AI Model!");
+        } catch (error) {
+          console.log("⚠️  API error:", error);
+
+          // Remove loading indicator
+          const loadingDiv = document.getElementById("loadingIndicator");
+          if (loadingDiv) loadingDiv.remove();
+
+          addChatMessage(
+            "assistant",
+            "❌ " +
+              (error.message ||
+                "Could not understand your request. Please try again with more details."),
+            true,
+          );
+          showError(error.message || "Could not generate plan");
+        }
+      }
+
+      function createPlanLocal(budget, days, category) {
+        // Local fallback plan creation if API unavailable
+        const catData = CATEGORIES[category];
+        const dailyBudget = budget / days;
+        const items = catData.items;
+        const prices = catData.prices;
+        const maxItems = catData.maxItemsPerDay;
+
+        // Get affordable items
+        const affordableItems = items.filter(
+          (item) => prices[item] <= dailyBudget * 1.3,
+        );
+        const pool =
+          affordableItems.length > 0 ? affordableItems : items.slice(0, 5);
+
+        const dayPlans = [];
+        let remaining = budget;
+        let totalSpent = 0;
+
+        for (let day = 1; day <= days; day++) {
+          const dayItems = [];
+          let daySpend = 0;
+          const shuffled = [...pool].sort(() => Math.random() - 0.5);
+
+          for (const item of shuffled) {
+            const cost = prices[item];
+            if (
+              dayItems.length < maxItems &&
+              daySpend + cost <= dailyBudget &&
+              remaining - cost >= 0
+            ) {
+              dayItems.push(item);
+              daySpend += cost;
+              remaining -= cost;
+            }
+          }
+
+          // Fallback: add cheapest item
+          if (dayItems.length === 0 && remaining > 0) {
+            const cheapest = items.reduce((min, item) =>
+              prices[item] < prices[min] ? item : min,
+            );
+            if (remaining >= prices[cheapest]) {
+              dayItems.push(cheapest);
+              daySpend = prices[cheapest];
+              remaining -= daySpend;
+            }
+          }
+
+          totalSpent += daySpend;
+          dayPlans.push({ day, items: dayItems, spend: daySpend });
+        }
+
+        return {
+          budget,
+          days,
+          category,
+          daily_budget: dailyBudget,
+          day_plans: dayPlans,
+          total_spent: totalSpent,
+          remaining: Math.max(0, budget - totalSpent),
+        };
+      }
+
+      function displayPlan(plan) {
+        // Update title
+        document.getElementById("planTitle").textContent =
+          `${CATEGORIES[plan.category].icon} ${CATEGORIES[plan.category].label} Plan • ${plan.days} Days`;
+
+        // Update stats
+        document.getElementById("dailyBudgetDisplay").textContent =
+          formatCurrency(plan.daily_budget);
+        document.getElementById("totalBudgetDisplay").textContent =
+          formatCurrency(plan.budget);
+        document.getElementById("totalSpentDisplay").textContent =
+          formatCurrency(plan.total_spent);
+        document.getElementById("remainingDisplay").textContent =
+          formatCurrency(plan.remaining);
+
+        // Display daily plans
+        const planHtml = (plan.day_plans || [])
+          .map(
+            (dayPlan) => `
+                <div class="daily-plan">
+                    <div>
+                        <span class="day-number">Day ${dayPlan.day}</span>
+                        <span class="day-amount">${formatCurrency(dayPlan.spend)}</span>
+                    </div>
+                    <div class="day-items">
+                        ${
+                          dayPlan.items.length > 0
+                            ? dayPlan.items
+                                .map(
+                                  (item) => `<span class="item">${item}</span>`,
+                                )
+                                .join(" ")
+                            : '<em style="color: var(--text-light);">Rest day</em>'
+                        }
+                    </div>
+                </div>
+            `,
+          )
+          .join("");
+
+        document.getElementById("dailyPlanContainer").innerHTML = planHtml;
+
+        // Show results card
+        document.getElementById("resultsCard").classList.add("active");
+      }
+
+      function resetForm() {
+        document.getElementById("userInput").value = "";
+        clearChat();
+        document.getElementById("resultsCard").classList.remove("active");
+        document.getElementById("errorMessage").classList.remove("show");
+        document.getElementById("successMessage").classList.remove("show");
+      }
+
+      function exportPlan() {
+        if (!currentPlan) return;
+
+        let csv = "Day,Items,Amount (PKR)\n";
+        (currentPlan.day_plans || []).forEach((day) => {
+          const items = day.items.join(" + ") || "Rest day";
+          csv += `${day.day},"${items}",${day.spend}\n`;
+        });
+        csv += `\nSummary\nDaily Allowance,${currentPlan.daily_budget}\n`;
+        csv += `Total Budget,${currentPlan.budget}\n`;
+        csv += `Total Spent,${currentPlan.total_spent}\n`;
+        csv += `Remaining,${currentPlan.remaining}\n`;
+
+        const blob = new Blob([csv], { type: "text/csv" });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `expense_plan_${currentPlan.category}.csv`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        showSuccess("📥 Plan downloaded as CSV!");
+      }
+
+      // ==========================================
+      // EVENT LISTENERS & INITIALIZATION
+      // ==========================================
+
+      document.getElementById("userInput").addEventListener("keypress", (e) => {
+        if (e.key === "Enter") generateChatPlan();
+      });
+
+      // ==========================================
+      // INITIALIZATION - LOAD FROM API
+      // ==========================================
+
+      // Load datasets from API on page load
+      window.addEventListener("load", async () => {
+        console.log("🚀 Initializing AI Expense Planner with spaCy NLP...");
+        console.log(`📡 API Base URL: ${API_BASE_URL}`);
+
+        const apiAvailable = await loadDatasetsFromAPI();
+
+        if (apiAvailable) {
+          console.log("✅ AI Expense Planner - Connected to API Backend");
+        } else {
+          console.log("⚠️  AI Expense Planner - Using Built-in Data");
+        }
+      });
+    </script>
+  </body>
+</html>

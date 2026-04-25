@@ -1,0 +1,370 @@
+{
+  "metadata": {
+    "trained_at": "2026-04-24T21:52:13.630148",
+    "version": "1.0.0",
+    "models": {
+      "meal": {
+        "category": "meal",
+        "stats": {
+          "mean": 195.0,
+          "median": 175.0,
+          "std": 108.78878618681247,
+          "min": 50.0,
+          "max": 400.0,
+          "count": 20
+        },
+        "feature_weights": {
+          "protein": 0.3,
+          "calories": 0.25,
+          "freshness": 0.2,
+          "brand": 0.15,
+          "preparation": 0.1
+        },
+        "training_samples": 20,
+        "trained_at": "2026-04-24T21:52:13.624216"
+      },
+      "laundry": {
+        "category": "laundry",
+        "stats": {
+          "mean": 260.42857142857144,
+          "median": 272.0,
+          "std": 147.1159476087359,
+          "min": 60.0,
+          "max": 520.0,
+          "count": 14
+        },
+        "feature_weights": {
+          "concentration": 0.4,
+          "brand": 0.25,
+          "capacity": 0.2,
+          "eco_friendly": 0.1,
+          "fragrance": 0.05
+        },
+        "training_samples": 14,
+        "trained_at": "2026-04-24T21:52:13.625330"
+      },
+      "maintenance": {
+        "category": "maintenance",
+        "stats": {
+          "mean": 362.93333333333334,
+          "median": 350.0,
+          "std": 266.6271970790343,
+          "min": 80.0,
+          "max": 1200.0,
+          "count": 15
+        },
+        "feature_weights": {
+          "frequency": 0.3,
+          "urgency": 0.3,
+          "labor_cost": 0.2,
+          "material_cost": 0.15,
+          "complexity": 0.05
+        },
+        "training_samples": 15,
+        "trained_at": "2026-04-24T21:52:13.626825"
+      }
+    }
+  },
+  "datasets": {
+    "meal": [
+      {
+        "name": "Biryani (1 plate)",
+        "price": 280,
+        "calories": 450,
+        "protein": 12
+      },
+      {
+        "name": "Butter Chicken (1 plate)",
+        "price": 350,
+        "calories": 520,
+        "protein": 18
+      },
+      {
+        "name": "Tandoori Chicken (500g)",
+        "price": 400,
+        "calories": 380,
+        "protein": 28
+      },
+      {
+        "name": "Dal Makhani (1 bowl)",
+        "price": 200,
+        "calories": 280,
+        "protein": 8
+      },
+      {
+        "name": "Samosa (2 pcs)",
+        "price": 60,
+        "calories": 180,
+        "protein": 3
+      },
+      {
+        "name": "Pakora (200g)",
+        "price": 80,
+        "calories": 220,
+        "protein": 4
+      },
+      {
+        "name": "Naan (2 pcs)",
+        "price": 120,
+        "calories": 250,
+        "protein": 7
+      },
+      {
+        "name": "Roti (4 pcs)",
+        "price": 50,
+        "calories": 200,
+        "protein": 6
+      },
+      {
+        "name": "Chicken Karahi (500g)",
+        "price": 350,
+        "calories": 420,
+        "protein": 22
+      },
+      {
+        "name": "Aloo Gosht (500g)",
+        "price": 300,
+        "calories": 380,
+        "protein": 16
+      },
+      {
+        "name": "Pulao (1 plate)",
+        "price": 240,
+        "calories": 400,
+        "protein": 10
+      },
+      {
+        "name": "Paneer Tikka (200g)",
+        "price": 280,
+        "calories": 280,
+        "protein": 15
+      },
+      {
+        "name": "Fish Fry (250g)",
+        "price": 320,
+        "calories": 320,
+        "protein": 24
+      },
+      {
+        "name": "Kebab (250g)",
+        "price": 200,
+        "calories": 350,
+        "protein": 20
+      },
+      {
+        "name": "Dosa (1 pcs)",
+        "price": 150,
+        "calories": 300,
+        "protein": 8
+      },
+      {
+        "name": "Idli (4 pcs)",
+        "price": 100,
+        "calories": 200,
+        "protein": 5
+      },
+      {
+        "name": "Chole Bhature",
+        "price": 140,
+        "calories": 450,
+        "protein": 12
+      },
+      {
+        "name": "Gulab Jamun (4 pcs)",
+        "price": 80,
+        "calories": 280,
+        "protein": 2
+      },
+      {
+        "name": "Laddu (200g)",
+        "price": 100,
+        "calories": 350,
+        "protein": 4
+      },
+      {
+        "name": "Kheer (1 bowl)",
+        "price": 100,
+        "calories": 220,
+        "protein": 4
+      }
+    ],
+    "laundry": [
+      {
+        "name": "Surf Excel (500g)",
+        "price": 280,
+        "concentration": "high",
+        "capacity": 15
+      },
+      {
+        "name": "Ariel (1kg)",
+        "price": 520,
+        "concentration": "premium",
+        "capacity": 30
+      },
+      {
+        "name": "Washing Bar Soap",
+        "price": 60,
+        "concentration": "standard",
+        "capacity": 1
+      },
+      {
+        "name": "Comfort Softener",
+        "price": 160,
+        "concentration": "medium",
+        "capacity": 8
+      },
+      {
+        "name": "Bleach (500ml)",
+        "price": 90,
+        "concentration": "high",
+        "capacity": 20
+      },
+      {
+        "name": "Stain Remover",
+        "price": 120,
+        "concentration": "premium",
+        "capacity": 5
+      },
+      {
+        "name": "Dettol (250ml)",
+        "price": 140,
+        "concentration": "high",
+        "capacity": 10
+      },
+      {
+        "name": "Rin Detergent (1kg)",
+        "price": 429,
+        "concentration": "premium",
+        "capacity": 25
+      },
+      {
+        "name": "Vim Bar (150g)",
+        "price": 83,
+        "concentration": "standard",
+        "capacity": 3
+      },
+      {
+        "name": "Nirma Detergent",
+        "price": 264,
+        "concentration": "standard",
+        "capacity": 20
+      },
+      {
+        "name": "Vanish Stain Remover",
+        "price": 450,
+        "concentration": "premium",
+        "capacity": 12
+      },
+      {
+        "name": "Dreft Laundry",
+        "price": 350,
+        "concentration": "premium",
+        "capacity": 18
+      },
+      {
+        "name": "Woolite Delicates",
+        "price": 380,
+        "concentration": "premium",
+        "capacity": 10
+      },
+      {
+        "name": "Downy Softener",
+        "price": 320,
+        "concentration": "premium",
+        "capacity": 15
+      }
+    ],
+    "maintenance": [
+      {
+        "name": "Electricity Bill (Monthly)",
+        "price": 1200,
+        "frequency": "monthly",
+        "usage": "high"
+      },
+      {
+        "name": "Gas Bill (Monthly)",
+        "price": 400,
+        "frequency": "monthly",
+        "usage": "medium"
+      },
+      {
+        "name": "Plumber Visit",
+        "price": 500,
+        "frequency": "occasional",
+        "usage": "emergency"
+      },
+      {
+        "name": "Electrician Visit",
+        "price": 600,
+        "frequency": "occasional",
+        "usage": "emergency"
+      },
+      {
+        "name": "LED Light Bulb",
+        "price": 180,
+        "frequency": "quarterly",
+        "usage": "replacement"
+      },
+      {
+        "name": "Broom / Mop",
+        "price": 150,
+        "frequency": "annual",
+        "usage": "cleaning"
+      },
+      {
+        "name": "Garbage Bags (20pcs)",
+        "price": 80,
+        "frequency": "monthly",
+        "usage": "regular"
+      },
+      {
+        "name": "Cockroach Spray",
+        "price": 220,
+        "frequency": "quarterly",
+        "usage": "pest_control"
+      },
+      {
+        "name": "Water Filter Refill",
+        "price": 350,
+        "frequency": "quarterly",
+        "usage": "essential"
+      },
+      {
+        "name": "Phenyl Floor Cleaner",
+        "price": 248,
+        "frequency": "monthly",
+        "usage": "cleaning"
+      },
+      {
+        "name": "Electrical Tape",
+        "price": 116,
+        "frequency": "occasional",
+        "usage": "repair"
+      },
+      {
+        "name": "Paint (1L)",
+        "price": 450,
+        "frequency": "annual",
+        "usage": "maintenance"
+      },
+      {
+        "name": "Door Lock Repair",
+        "price": 400,
+        "frequency": "occasional",
+        "usage": "repair"
+      },
+      {
+        "name": "Window Repair",
+        "price": 350,
+        "frequency": "occasional",
+        "usage": "repair"
+      },
+      {
+        "name": "Plumbing Pipe (meter)",
+        "price": 200,
+        "frequency": "occasional",
+        "usage": "repair"
+      }
+    ]
+  }
+}

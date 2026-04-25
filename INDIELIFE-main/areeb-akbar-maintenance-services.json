@@ -1,0 +1,279 @@
+[
+  {
+    "serviceName": "Plumbing Repair & Installation",
+    "description": "Professional plumbing services including pipe repair, installation, and maintenance for hostels and residential areas",
+    "price": 1500,
+    "unit": "per visit",
+    "serviceType": "Maintenance",
+    "serviceProviderId": "69d2b06c5abac92e2ecf3a87",
+    "serviceProviderRole": "Maintenance",
+    "serviceProviderName": "Areeb Akbar",
+    "serviceProviderEmail": "areebakbar8@gmail.com",
+    "serviceProviderPhone": "03161723969",
+    "serviceProviderCity": "Gojra",
+    "serviceProviderAddress": "Street #123",
+    "expertise": "Plumbing",
+    "servicesOffered": [
+      "Pipe repair",
+      "Leak fixing",
+      "Installation",
+      "Maintenance",
+      "Tank cleaning"
+    ],
+    "experience": "Expert",
+    "imageUrl": "maintenance/plumbing-areeb-akbar.jpg",
+    "additionalImages": [],
+    "availableDays": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday"
+    ],
+    "availableTimeSlots": [
+      {
+        "startTime": "09:00",
+        "endTime": "18:00"
+      }
+    ],
+    "rating": 0,
+    "totalReviews": 0,
+    "totalOrders": 0,
+    "status": "Active",
+    "featured": false,
+    "discountPercentage": 0,
+    "tags": ["plumbing", "repair", "maintenance", "hostel"]
+  },
+  {
+    "serviceName": "Electrical Repair & Wiring",
+    "description": "Professional electrical services including wiring, repair, installation, and maintenance with safety compliance",
+    "price": 1200,
+    "unit": "per visit",
+    "serviceType": "Maintenance",
+    "serviceProviderId": "69d2b06c5abac92e2ecf3a87",
+    "serviceProviderRole": "Maintenance",
+    "serviceProviderName": "Areeb Akbar",
+    "serviceProviderEmail": "areebakbar8@gmail.com",
+    "serviceProviderPhone": "03161723969",
+    "serviceProviderCity": "Gojra",
+    "serviceProviderAddress": "Street #123",
+    "expertise": "Electrical",
+    "servicesOffered": [
+      "Wiring installation",
+      "Circuit repair",
+      "Switch replacement",
+      "Safety inspection",
+      "Load management"
+    ],
+    "experience": "Expert",
+    "imageUrl": "maintenance/electrical-areeb-akbar.jpg",
+    "additionalImages": [],
+    "availableDays": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday"
+    ],
+    "availableTimeSlots": [
+      {
+        "startTime": "09:00",
+        "endTime": "18:00"
+      }
+    ],
+    "rating": 0,
+    "totalReviews": 0,
+    "totalOrders": 0,
+    "status": "Active",
+    "featured": false,
+    "discountPercentage": 0,
+    "tags": ["electrical", "wiring", "repair", "maintenance"]
+  },
+  {
+    "serviceName": "General Carpentry & Repairs",
+    "description": "Comprehensive carpentry services including door installation, furniture repair, wood maintenance, and general repairs",
+    "price": 1000,
+    "unit": "per visit",
+    "serviceType": "Maintenance",
+    "serviceProviderId": "69d2b06c5abac92e2ecf3a87",
+    "serviceProviderRole": "Maintenance",
+    "serviceProviderName": "Areeb Akbar",
+    "serviceProviderEmail": "areebakbar8@gmail.com",
+    "serviceProviderPhone": "03161723969",
+    "serviceProviderCity": "Gojra",
+    "serviceProviderAddress": "Street #123",
+    "expertise": "Carpentry",
+    "servicesOffered": [
+      "Door installation",
+      "Cabinet repair",
+      "Furniture maintenance",
+      "Wood finishing",
+      "Custom carpentry"
+    ],
+    "experience": "Expert",
+    "imageUrl": "maintenance/carpentry-areeb-akbar.jpg",
+    "additionalImages": [],
+    "availableDays": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday"
+    ],
+    "availableTimeSlots": [
+      {
+        "startTime": "09:00",
+        "endTime": "18:00"
+      }
+    ],
+    "rating": 0,
+    "totalReviews": 0,
+    "totalOrders": 0,
+    "status": "Active",
+    "featured": false,
+    "discountPercentage": 0,
+    "tags": ["carpentry", "repairs", "furniture", "maintenance"]
+  },
+  {
+    "serviceName": "Painting & Wall Finishing",
+    "description": "Professional painting services including interior and exterior painting, wall finishing, and color consultation",
+    "price": 800,
+    "unit": "per day",
+    "serviceType": "Maintenance",
+    "serviceProviderId": "69d2b06c5abac92e2ecf3a87",
+    "serviceProviderRole": "Maintenance",
+    "serviceProviderName": "Areeb Akbar",
+    "serviceProviderEmail": "areebakbar8@gmail.com",
+    "serviceProviderPhone": "03161723969",
+    "serviceProviderCity": "Gojra",
+    "serviceProviderAddress": "Street #123",
+    "expertise": "Painting",
+    "servicesOffered": [
+      "Interior painting",
+      "Exterior painting",
+      "Wall preparation",
+      "Color consultation",
+      "Surface finishing"
+    ],
+    "experience": "Expert",
+    "imageUrl": "maintenance/painting-areeb-akbar.jpg",
+    "additionalImages": [],
+    "availableDays": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday"
+    ],
+    "availableTimeSlots": [
+      {
+        "startTime": "08:00",
+        "endTime": "17:00"
+      }
+    ],
+    "rating": 0,
+    "totalReviews": 0,
+    "totalOrders": 0,
+    "status": "Active",
+    "featured": false,
+    "discountPercentage": 0,
+    "tags": ["painting", "interior", "exterior", "maintenance"]
+  },
+  {
+    "serviceName": "AC & Appliance Maintenance",
+    "description": "Professional maintenance and repair services for air conditioning units, refrigerators, and other electrical appliances",
+    "price": 1300,
+    "unit": "per visit",
+    "serviceType": "Maintenance",
+    "serviceProviderId": "69d2b06c5abac92e2ecf3a87",
+    "serviceProviderRole": "Maintenance",
+    "serviceProviderName": "Areeb Akbar",
+    "serviceProviderEmail": "areebakbar8@gmail.com",
+    "serviceProviderPhone": "03161723969",
+    "serviceProviderCity": "Gojra",
+    "serviceProviderAddress": "Street #123",
+    "expertise": "Appliance Repair",
+    "servicesOffered": [
+      "AC servicing",
+      "Refrigerator repair",
+      "Gas filling",
+      "Installation",
+      "Annual maintenance"
+    ],
+    "experience": "Expert",
+    "imageUrl": "maintenance/appliance-areeb-akbar.jpg",
+    "additionalImages": [],
+    "availableDays": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday"
+    ],
+    "availableTimeSlots": [
+      {
+        "startTime": "10:00",
+        "endTime": "17:00"
+      }
+    ],
+    "rating": 0,
+    "totalReviews": 0,
+    "totalOrders": 0,
+    "status": "Active",
+    "featured": false,
+    "discountPercentage": 0,
+    "tags": ["ac", "appliances", "maintenance", "repair"]
+  },
+  {
+    "serviceName": "Emergency Maintenance Service",
+    "description": "24/7 emergency maintenance service for urgent repairs and issues at hostels and residential areas",
+    "price": 2000,
+    "unit": "per visit",
+    "serviceType": "Maintenance",
+    "serviceProviderId": "69d2b06c5abac92e2ecf3a87",
+    "serviceProviderRole": "Maintenance",
+    "serviceProviderName": "Areeb Akbar",
+    "serviceProviderEmail": "areebakbar8@gmail.com",
+    "serviceProviderPhone": "03161723969",
+    "serviceProviderCity": "Gojra",
+    "serviceProviderAddress": "Street #123",
+    "expertise": "Emergency Repair",
+    "servicesOffered": [
+      "Emergency plumbing",
+      "Emergency electrical",
+      "Water leak fixing",
+      "Gas line repair",
+      "Door/window issues"
+    ],
+    "experience": "Expert",
+    "imageUrl": "maintenance/emergency-areeb-akbar.jpg",
+    "additionalImages": [],
+    "availableDays": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday"
+    ],
+    "availableTimeSlots": [
+      {
+        "startTime": "00:00",
+        "endTime": "23:59"
+      }
+    ],
+    "rating": 0,
+    "totalReviews": 0,
+    "totalOrders": 0,
+    "status": "Active",
+    "featured": true,
+    "discountPercentage": 0,
+    "tags": ["emergency", "24/7", "urgent", "maintenance"]
+  }
+]
