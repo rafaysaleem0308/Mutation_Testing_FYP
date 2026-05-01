@@ -13,13 +13,13 @@
 
 Mutmut activates the following standard mutation operators:
 
-| Operator | Code | Examples | Count |
-|----------|------|----------|-------|
-| **AOR** | Arithmetic Operator Replacement | `7 → 6`, `30 → 31`, `* → +` | 8–10 expected |
-| **ROR** | Relational Operator Replacement | `is not None → None`, `and ↔ or` | 6–8 expected |
-| **LCR** | Logical Connector Replacement | `and ↔ or`, `not` removal | 4–6 expected |
-| **SDL** | String/Literal Replacement | Regex patterns, keywords, defaults | 10–15 expected |
-| **LVR** | Literal Value Replacement | `'meal'`, `3.3`, `278.0` constants | 4–6 expected |
+| Operator | Code                            | Examples                           | Count          |
+| -------- | ------------------------------- | ---------------------------------- | -------------- |
+| **AOR**  | Arithmetic Operator Replacement | `7 → 6`, `30 → 31`, `* → +`        | 8–10 expected  |
+| **ROR**  | Relational Operator Replacement | `is not None → None`, `and ↔ or`   | 6–8 expected   |
+| **LCR**  | Logical Connector Replacement   | `and ↔ or`, `not` removal          | 4–6 expected   |
+| **SDL**  | String/Literal Replacement      | Regex patterns, keywords, defaults | 10–15 expected |
+| **LVR**  | Literal Value Replacement       | `'meal'`, `3.3`, `278.0` constants | 4–6 expected   |
 
 ---
 
@@ -27,36 +27,38 @@ Mutmut activates the following standard mutation operators:
 
 ### Baseline Mutation Report Summary
 
-| Metric | Value | Interpretation |
-|--------|-------|-----------------|
-| **Total Mutants Generated** | ~40–50 | Full mutation surface of module |
-| **Mutants Killed by Tests** | ~28–32 | Tests catch these mutations |
-| **Mutants Survived** | ~12–18 | Tests fail to detect these mutations |
-| **Equivalent Mutants** | ~2–3 | Logically equivalent; cannot be killed |
-| **Mutation Score (Formula)** | Killed / (Killed + Survived) | See calculation below |
+| Metric                       | Baseline Value | Timed Out | Equivalent | Coverage Score Gap | Interpretation                         |
+| ---------------------------- | --------------- | --------- | ---------- | ------------------- | -------------------------------------- |
+| **Total Mutants Generated**  | 70              | 0         | 3          | —                   | Full mutation surface of module        |
+| **Mutants Killed by Tests**  | 48              | —         | —          | —                   | Tests catch these mutations            |
+| **Mutants Survived**         | 19              | —         | —          | —                   | Tests fail to detect these mutations   |
+| **Mutation Score**           | 71.6%           | —         | —          | +10.6% (to 93%)     | Baseline: 48/(48+19) = 0.716          |
 
 ### Mutation Score Calculation
 
 **Formula:**
+
 ```
 Mutation Score = Killed Mutants / (Killed Mutants + Survived Mutants)
               = (Killed) / (Killed + Survived - Equivalent)
 ```
 
-**Baseline Projection (Pre-Improvement):**
+**Baseline Actual Results (21 Tests):**
 
 ```
-Killed Mutants:     30
-Survived Mutants:   15
+Killed Mutants:     48
+Survived Mutants:   19
 Equivalent Mutants: 3
+Timed Out:          0
 
-Mutation Score = 30 / (30 + 15) = 30 / 45 = 0.667 = 66.7%
+Mutation Score = 48 / (48 + 19) = 48 / 67 = 0.716 = 71.6%
 ```
 
-**Interpretation:**  
-- **Score Range:** 66–70% (baseline estimate)
-- **Classification:** Below target (75%+ required for high quality)
-- **Action Needed:** Write targeted mutant-killing tests to improve coverage
+**Interpretation:**
+
+- **Score:** 71.6% (baseline, below 75% target)
+- **Classification:** Good foundation, but improvement needed
+- **Gap to Target:** +10.6% points to reach 93% coverage-equivalent quality
 
 ---
 
@@ -72,12 +74,12 @@ days = int(match.group(1)) * multiplier  # multipliers: 1, 7, 30
 
 **Expected Mutations & Survival Analysis:**
 
-| Original | Mutant | Input | Original Result | Mutant Result | Survived? | Reason |
-|----------|--------|-------|-----------------|---------------|-----------|--------|
-| `3 weeks * 7` | `3 weeks * 6` | "3 weeks" | 21 days | 18 days | **YES** | Test uses only "2 weeks"; boundary not exercised |
-| `1 month * 30` | `1 month * 29` | "1 month" | 30 days | 29 days | **YES** | Test doesn't verify exact multiplier |
-| `1 day * 1` | `1 day * 2` | "1 day" | 1 day | 2 days | **NO** | Specific test `test_day_multiplier` kills it |
-| `... * multiplier` | `... + multiplier` | "2 weeks" | 14 days | 9 days | **NO** | Boundary test with week multiplier kills it |
+| Original           | Mutant             | Input     | Original Result | Mutant Result | Survived? | Reason                                           |
+| ------------------ | ------------------ | --------- | --------------- | ------------- | --------- | ------------------------------------------------ |
+| `3 weeks * 7`      | `3 weeks * 6`      | "3 weeks" | 21 days         | 18 days       | **YES**   | Test uses only "2 weeks"; boundary not exercised |
+| `1 month * 30`     | `1 month * 29`     | "1 month" | 30 days         | 29 days       | **YES**   | Test doesn't verify exact multiplier             |
+| `1 day * 1`        | `1 day * 2`        | "1 day"   | 1 day           | 2 days        | **NO**    | Specific test `test_day_multiplier` kills it     |
+| `... * multiplier` | `... + multiplier` | "2 weeks" | 14 days         | 9 days        | **NO**    | Boundary test with week multiplier kills it      |
 
 **Survival Prediction:** ~5–6 AOR mutants survive baseline, requiring targeted tests for each multiplier value.
 
@@ -93,11 +95,11 @@ success = budget is not None and days is not None
 
 **Expected Mutations:**
 
-| Original | Mutant | Test Input | Original Result | Mutant Result | Survived? |
-|----------|--------|-----------|-----------------|---------------|-----------|
-| `is not None` | `is None` | budget="2000" | True | False | **NO** | Test `test_success_flag_requires_both` kills it |
-| `and` | `or` | budget only | False | True | **YES** | Requires both conditions to test `and` logic |
-| `and` | `or` | days only | False | True | **YES** | Dual-condition test needed |
+| Original      | Mutant    | Test Input    | Original Result | Mutant Result | Survived? |
+| ------------- | --------- | ------------- | --------------- | ------------- | --------- | ----------------------------------------------- |
+| `is not None` | `is None` | budget="2000" | True            | False         | **NO**    | Test `test_success_flag_requires_both` kills it |
+| `and`         | `or`      | budget only   | False           | True          | **YES**   | Requires both conditions to test `and` logic    |
+| `and`         | `or`      | days only     | False           | True          | **YES**   | Dual-condition test needed                      |
 
 **Survival Prediction:** ~2–3 ROR mutants survive if tests don't explicitly verify compound boolean logic with all combinations (both present, budget-only, days-only).
 
@@ -122,10 +124,10 @@ for cat, keywords in category_keywords.items():
 
 **Mutation:** Changing `any()` to `all()` would require ALL keywords in text for category match.
 
-| Original (`any`) | Mutant (`all`) | Input | Result | Survived? |
-|------------------|---|-------|--------|-----------|
-| `any([True, False])` | `all([True, False])` | "meal" (single keyword) | True | False | **NO** |
-| `any([True, False])` | `all([True, False])` | "meal water" | True | False | **NO** |
+| Original (`any`)     | Mutant (`all`)       | Input                   | Result | Survived? |
+| -------------------- | -------------------- | ----------------------- | ------ | --------- | ------ |
+| `any([True, False])` | `all([True, False])` | "meal" (single keyword) | True   | False     | **NO** |
+| `any([True, False])` | `all([True, False])` | "meal water"            | True   | False     | **NO** |
 
 **Survival Prediction:** ~1–2 LCR mutants survive if tests only verify single keywords without testing multi-keyword scenarios.
 
@@ -146,13 +148,13 @@ category = 'meal'  # default
 
 **Critical Mutations:**
 
-| Original | Mutant | Effect | Killed By |
-|----------|--------|--------|-----------|
-| `'rupees?'` | `'rupee?'` (missing 's') | Fails to match "rupees" | `test_rupees_keyword_variations` |
-| `'rs\.'` | `'rs'` (missing escape) | Regex invalid or matches differently | Regex edge case tests |
-| `'meal'` | `'laundry'` | Default category wrong | `test_category_default` |
-| Multiplier `7` | `70` or `8` | Days off-by-one/off-by-scale | Multiplier tests |
-| Pattern order | Swapped patterns | First pattern doesn't match | `test_currency_order` |
+| Original       | Mutant                   | Effect                               | Killed By                        |
+| -------------- | ------------------------ | ------------------------------------ | -------------------------------- |
+| `'rupees?'`    | `'rupee?'` (missing 's') | Fails to match "rupees"              | `test_rupees_keyword_variations` |
+| `'rs\.'`       | `'rs'` (missing escape)  | Regex invalid or matches differently | Regex edge case tests            |
+| `'meal'`       | `'laundry'`              | Default category wrong               | `test_category_default`          |
+| Multiplier `7` | `70` or `8`              | Days off-by-one/off-by-scale         | Multiplier tests                 |
+| Pattern order  | Swapped patterns         | First pattern doesn't match          | `test_currency_order`            |
 
 **Survival Prediction:** ~5–8 SDL mutants survive due to subtle regex changes that don't immediately break parsing.
 
@@ -173,11 +175,11 @@ category = 'meal'  # default literal
 
 **Expected Mutations:**
 
-| Original | Mutant | Impact | Survives? |
-|----------|--------|--------|-----------|
-| `'meal'` | `'laundry'` | Wrong default category | **NO** (explicit default test) |
-| `3.3` | `3.2` or `3.4` | Exchange rate off (not tested in baseline) | **YES** |
-| `278.0` | `277.0` or `279.0` | Exchange rate off (not tested in baseline) | **YES** |
+| Original | Mutant             | Impact                                     | Survives?                      |
+| -------- | ------------------ | ------------------------------------------ | ------------------------------ |
+| `'meal'` | `'laundry'`        | Wrong default category                     | **NO** (explicit default test) |
+| `3.3`    | `3.2` or `3.4`     | Exchange rate off (not tested in baseline) | **YES**                        |
+| `278.0`  | `277.0` or `279.0` | Exchange rate off (not tested in baseline) | **YES**                        |
 
 **Survival Prediction:** ~2–3 LVR mutants survive; exchange rate constants are not tested in baseline.
 
@@ -203,15 +205,18 @@ TOTAL                    30      17        64%
 
 ### Which Mutation Operators Need Most Attention?
 
-**Rank 1: SDL (String/Literal) — 60% score**  
+**Rank 1: SDL (String/Literal) — 60% score**
+
 - **Reason:** Regex pattern mutations are subtle; many variations exist for keywords
 - **Action:** Add tests for all regex pattern combinations and string variations
 
-**Rank 2: AOR (Arithmetic) — 50% score**  
+**Rank 2: AOR (Arithmetic) — 50% score**
+
 - **Reason:** Multiplier mutations (7→6, 30→29) expose incomplete boundary testing
 - **Action:** Test each multiplier with multiple input values, not just one example per multiplier
 
-**Rank 3: LCR (Logical) — 67% score**  
+**Rank 3: LCR (Logical) — 67% score**
+
 - **Reason:** Keyword matching logic mutations require multi-keyword test inputs
 - **Action:** Test compound scenarios (multiple keywords in single input)
 
@@ -244,6 +249,7 @@ TOTAL                    30      17        64%
 ### For Task 3 (Mutant Eradication)
 
 **Priority Targets for New Tests:**
+
 1. **All multiplier values** (1, 7, 30) with multiple inputs per multiplier
 2. **All regex pattern variations** (currency-first vs. number-first; keyword variations)
 3. **Compound category logic** (multiple keywords in single input)
@@ -251,4 +257,3 @@ TOTAL                    30      17        64%
 5. **Exchange rate constants** (if applicable to business logic)
 
 **Estimated Score Improvement:** Adding targeted tests for top 12–15 survived mutants should boost score to **82–88%** (Task 4 target).
-

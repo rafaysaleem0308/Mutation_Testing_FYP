@@ -6,7 +6,7 @@
 
 **File Path:** `Ai model fyp/ai_analysis.py`  
 **Lines of Code:** ~80  
-**Functions:** 1 primary (`analyze_user_input`)  
+**Functions:** 1 primary (`analyze_user_input`)
 
 ### Why This Module is Non-Trivial & Business-Critical
 
@@ -28,7 +28,7 @@
 
 3. **Coverage-Mutation Gap Prediction**
    - **Coverage Alone Insufficient:** 100% line coverage does NOT guarantee mutation killing if tests only check "happy path" (expected values) without boundary/edge-case assertions.
-   - **Predicted Survivors:** 
+   - **Predicted Survivors:**
      - Multiplier mutations (7→6, 30→31) if tests only verify one example
      - Default category mutations if tests assume default without explicit assertion
      - Regex pattern mutations if tests don't exercise all keyword variations
@@ -42,22 +42,22 @@
 
 Using `pytest-cov` with 21 comprehensive test cases:
 
-| Metric | Value | Status |
-|--------|-------|--------|
-| **Line Coverage** | 98% (78/80 lines) | ✓ Excellent |
-| **Branch Coverage** | 94% (30/32 branches) | ✓ Strong |
-| **Function Coverage** | 100% (1/1 functions) | ✓ Complete |
-| **Uncovered Lines** | 2 lines | Exception handling in try-except |
+| Metric                | Value                | Status                           |
+| --------------------- | -------------------- | -------------------------------- |
+| **Line Coverage**     | 93% (27/29 lines)    | ✓ Excellent                      |
+| **Branch Coverage**   | 93% (coverage combined) | ✓ Strong                         |
+| **Function Coverage** | 100% (1/1 functions) | ✓ Complete                       |
+| **Uncovered Lines**   | 2 lines              | Exception handling in try-except |
 
 ### Coverage Breakdown by Component
 
-| Component | Coverage | Notes |
-|-----------|----------|-------|
-| Regex pattern matching | 100% | All budget patterns tested |
-| Duration multipliers | 100% | Days, weeks, months all exercised |
-| Category detection | 100% | All 3 categories + default tested |
-| Success flag logic | 98% | Edge case: exception handling not triggered |
-| Exception handling | 0% | Intentional—no malformed inputs tested |
+| Component              | Coverage | Notes                                       |
+| ---------------------- | -------- | ------------------------------------------- |
+| Regex pattern matching | 100%     | All budget patterns tested                  |
+| Duration multipliers   | 100%     | Days, weeks, months all exercised           |
+| Category detection     | 100%     | All 3 categories + default tested           |
+| Success flag logic     | 98%      | Edge case: exception handling not triggered |
+| Exception handling     | 0%       | Intentional—no malformed inputs tested      |
 
 ### Test Cases Contributing to Coverage
 
@@ -87,13 +87,13 @@ Using `pytest-cov` with 21 comprehensive test cases:
 
 ### Predicted Mutation Operator Weaknesses
 
-| Operator | Risk Level | Likely Survivors | Why |
-|----------|------------|-----------------|-----|
-| **AOR (Arithmetic)** | 🔴 HIGH | Week multiplier (7→6), month multiplier (30→29) | Tests use single examples; don't vary input counts |
-| **ROR (Relational)** | 🟡 MEDIUM | `>=` to `>` in bounds; `and` to `or` in success logic | Depends on assertion precision |
-| **LCR (Logical)** | 🟡 MEDIUM | Keyword matching logic; category priority | Could survive if tests don't exercise all combinations |
-| **SDL (String/Literal)** | 🔴 HIGH | Regex patterns; currency keywords; multiplier constants | Mutants produce subtle parse failures hard to detect |
-| **LVR (Literal Value)** | 🟡 MEDIUM | Default category (`'meal'`) | Survives if tests assume default without assertion |
+| Operator                 | Risk Level | Likely Survivors                                        | Why                                                    |
+| ------------------------ | ---------- | ------------------------------------------------------- | ------------------------------------------------------ |
+| **AOR (Arithmetic)**     | 🔴 HIGH    | Week multiplier (7→6), month multiplier (30→29)         | Tests use single examples; don't vary input counts     |
+| **ROR (Relational)**     | 🟡 MEDIUM  | `>=` to `>` in bounds; `and` to `or` in success logic   | Depends on assertion precision                         |
+| **LCR (Logical)**        | 🟡 MEDIUM  | Keyword matching logic; category priority               | Could survive if tests don't exercise all combinations |
+| **SDL (String/Literal)** | 🔴 HIGH    | Regex patterns; currency keywords; multiplier constants | Mutants produce subtle parse failures hard to detect   |
+| **LVR (Literal Value)**  | 🟡 MEDIUM  | Default category (`'meal'`)                             | Survives if tests assume default without assertion     |
 
 ### How Mutation Testing Will Reveal Weaknesses
 
@@ -116,7 +116,6 @@ Using `pytest-cov` with 21 comprehensive test cases:
 
 ## Conclusion
 
-**Coverage Finding:** Baseline 98% line coverage with strong branch coverage suggests good code path exploration, but coverage metrics alone cannot guarantee mutation resistance. The next phase (Task 2: Mutation Run) will identify specific weaknesses in test precision and logic coverage that even high code coverage may mask.
+**Coverage Finding:** Baseline 93% line coverage with strong branch coverage suggests good code path exploration, but coverage metrics alone cannot guarantee mutation resistance. The next phase (Task 2: Mutation Run) will identify specific weaknesses in test precision and logic coverage that even high code coverage may mask.
 
 **Expected Mutation Score:** Estimated 65–75% (baseline) before test improvements. Mutation testing will likely expose ~15–25 survived mutants concentrated in arithmetic operators, regex patterns, and logic connectors.
-
